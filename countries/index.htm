@@ -6,10 +6,10 @@
 		<script type="text/javascript" src="base.js"></script>
 		<script type="text/javascript" src="script.js"></script>
 	</head>
-	<body>
+	<body onload="generate();">
 		<div>
 			<p id="question"></p>
-			<input placeholder="Ответ" id="input" type="text">
+			<input placeholder="Ответ" id="input" type="text" onkeypress="if (event.keyCode==13) return checkAnswer();">
 			<input id="miss" type="button" value="Пропустить" onclick="miss()">
 			<input id="check" type="button" value="Проверить" onclick="checkAnswer()">
 			<p id="result"></p>
