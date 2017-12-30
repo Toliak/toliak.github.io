@@ -13,12 +13,16 @@ class Npc {
 	draw() {
 
 		if (this.position.plus(this.velocity).x<0) {
+			this.position.x = 0
 			this.velocity = new Vector2D(Math.floor(Math.random()*10), Math.floor(Math.random()*20-10));
 		} else if (this.position.plus(this.velocity).y<0) {
+			this.position.y = 0
 			this.velocity = new Vector2D(Math.floor(Math.random()*20-10), Math.floor(Math.random()*10));
 		} else if (this.position.plus(this.velocity).x+this.cpicture.width>CANVAS.width) {
+			this.position.x = CANVAS.width-this.cpicture.width
 			this.velocity = new Vector2D(Math.floor(Math.random()*10-20), Math.floor(Math.random()*10));
 		} else if (this.position.plus(this.velocity).y+this.cpicture.height>CANVAS.height) {
+			this.position.y = CANVAS.height-this.cpicture.height
 			this.velocity = new Vector2D(Math.floor(Math.random()*10), Math.floor(Math.random()*10-20));
 		}
 		this.position = this.position.plus(this.velocity);
