@@ -236,4 +236,39 @@
 	
 		<text transform="matrix(1 0 0 1 253.6118 249.834)" display="inline" font-family="'CourierNewPSMT'" font-size="8" letter-spacing="-1">changes only radius</text>
 </g>
+<g id="tractionLoss__x28_-0.1_x29_" display="none">
+	<polyline display="inline" fill="none" stroke="#FFFF00" stroke-width="0.5" stroke-miterlimit="10" points="233.917,253 
+		235.917,219.524 237.917,211.928 239.917,209.271 241.917,208.373 243.917,207.357 245.917,207.221 247.917,207.924 
+		249.917,208.041 251.917,208.021 253.917,208.275 255.917,207.865 257.917,208.1 259.917,208.529 261.917,208.412 263.917,208.1 
+		265.917,208.373 267.917,208.549 269.917,208.842 271.917,208.725 273.917,208.217 275.917,208.725 277.917,208.881 
+		279.917,208.666 281.917,208.783 283.917,208.959 285.917,208.139 287.917,208.607 289.917,209.193 291.917,208.686 
+		293.917,208.881 295.917,208.412 297.917,209.857 299.917,209.604 301.917,208.568 	"/>
+	<polyline display="inline" fill="none" stroke="#00FFFF" stroke-width="0.5" stroke-miterlimit="10" points="233.917,253 
+		235.917,219.524 237.917,216.106 239.917,214.604 241.917,213.998 243.917,213.139 245.917,213.119 247.917,213.744 
+		249.917,213.803 251.917,213.764 253.917,214.018 255.917,213.686 257.917,213.861 259.917,214.232 261.917,214.154 
+		263.917,213.881 265.917,214.115 267.917,214.271 269.917,214.525 271.917,214.428 273.917,214.018 275.917,214.369 
+		277.917,214.545 279.917,214.389 281.917,214.506 283.917,214.662 285.917,215.403 287.917,212.006 289.917,213.803 
+		291.917,214.232 293.917,214.721 295.917,214.857 297.917,215.54 299.917,214.935 301.917,213.725 	"/>
+	<polyline display="inline" fill="none" stroke="#FF00FF" stroke-width="0.5" stroke-miterlimit="10" points="233.917,253 
+		235.917,219.524 237.917,220.54 239.917,220.13 241.917,219.114 243.917,218.802 245.917,218.997 247.917,219.388 249.917,218.177 
+		251.917,218.763 253.917,221.497 255.917,219.388 257.917,219.075 259.917,219.31 261.917,220.501 263.917,219.896 265.917,219.31 
+		267.917,219.896 269.917,220.521 271.917,220.169 273.917,219.759 275.917,220.169 277.917,220.442 279.917,220.169 
+		281.917,223.958 283.917,220.989 285.917,220.54 287.917,219.856 289.917,220.54 291.917,220.306 293.917,220.677 295.917,219.388 
+		297.917,220.091 299.917,220.657 301.917,220.208 	"/>
+	<polyline display="inline" fill="none" stroke="#0000FF" stroke-width="0.5" stroke-miterlimit="10" points="233.917,253 
+		235.917,224.271 237.917,227.493 239.917,227.337 241.917,227.103 243.917,227.103 245.917,227.142 247.917,227.728 
+		249.917,227.532 251.917,227.415 253.917,227.825 255.917,227.454 257.917,227.024 259.917,228.196 261.917,228.782 
+		263.917,227.532 265.917,227.532 267.917,228.353 269.917,228.392 271.917,227.688 273.917,227.415 275.917,229.017 
+		277.917,228.802 279.917,228.177 281.917,228.118 283.917,227.923 285.917,228.665 287.917,227.591 289.917,228.431 
+		291.917,228.431 293.917,228.626 295.917,228.626 297.917,228.685 299.917,228.431 301.917,228.001 	"/>
+	<polyline display="inline" fill="none" stroke="#00FF00" stroke-width="0.5" stroke-miterlimit="10" points="233.917,253 
+		235.917,219.563 237.917,228.743 239.917,229.329 241.917,231.087 243.917,230.735 245.917,230.54 247.917,231.126 
+		249.917,231.165 251.917,230.97 253.917,231.282 255.917,231.048 257.917,226.048 259.917,231.575 261.917,231.556 
+		263.917,232.142 265.917,231.106 267.917,231.224 269.917,231.673 271.917,231.263 273.917,231.731 275.917,231.751 
+		277.917,231.653 279.917,231.399 281.917,231.673 283.917,231.79 285.917,230.696 287.917,231.282 289.917,232.493 291.917,231.79 
+		293.917,231.302 295.917,231.751 297.917,232.103 299.917,231.79 301.917,230.501 	"/>
+	<text transform="matrix(1 0 0 1 7.667 13)" display="inline"><tspan x="0" y="0" font-family="'MyriadPro-Regular'" font-size="10">HANDLING = {}</tspan><tspan x="0" y="12" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.mass = 1000</tspan><tspan x="0" y="24" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.turnMass = 1000</tspan><tspan x="0" y="36" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.dragCoeff = 1</tspan><tspan x="0" y="48" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.centerOfMass = {0,0,0}</tspan><tspan x="0" y="60" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.percentSubmerged = 10</tspan><tspan x="0" y="72" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.tractionMultiplier = 0.7</tspan><tspan x="0" y="84" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.tractionLoss = 0.8 - 0.1*(n-1)</tspan><tspan x="0" y="96" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.tractionBias = 0.5</tspan><tspan x="0" y="108" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.numberOfGears = 5</tspan><tspan x="0" y="120" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.maxVelocity = 200</tspan><tspan x="0" y="132" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.engineAcceleration = 5</tspan><tspan x="0" y="144" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.engineInertia = 5</tspan><tspan x="0" y="156" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.driveType = &quot;rwd&quot;</tspan><tspan x="0" y="168" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.engineType = &quot;petrol&quot;</tspan><tspan x="0" y="180" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.brakeDeceleration = 15</tspan><tspan x="0" y="192" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.brakeBias = 0.7</tspan><tspan x="0" y="204" font-family="'MyriadPro-Regular'" font-size="10">HANDLING.steeringLock = 30</tspan></text>
+	
+		<text transform="matrix(1 0 0 1 271.7446 249.5)" display="inline" font-family="'CourierNewPSMT'" font-size="8" letter-spacing="-1">lowered tractionLoss cause of unexpected skid</text>
+</g>
 </svg>
