@@ -1,0 +1,32 @@
+@font-face {
+    font-family: CourierNewPSMT;
+    src: url(font.ttf);
+}
+
+body {
+	overflow: hidden;
+}
+
+* {
+	margin: 0 0 0 0;
+	padding: 0 0 0 0;
+}
+
+#links>a:hover {
+    text-decoration: underline;
+}
+
+
+#numbers {
+	float: right;
+	background-color: #000;
+}
+
+#numbers:after {
+  visibility: hidden;
+  display: block;
+  font-size: 0;
+  content: " ";
+  clear: both;
+  height: 0;
+}
