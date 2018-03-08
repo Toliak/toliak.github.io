@@ -3,7 +3,7 @@ class IPicture {
 		if (!(typeof(url)==="string")) throw "TypeError: Expected String at argument 1, got "+typeof(url);
 		if (!(typeof(width)==="number")) throw "TypeError: Expected Number at argument 2, got "+typeof(width);
 		if (!(typeof(height)==="number")) throw "TypeError: Expected Number at argument 3, got "+typeof(height);
-		if (typeof(onloadHandle)!=="undefined" && typeof(onloadHandle)==="function") throw "TypeError: Expected Function at argument 4, got "+typeof(pos);
+		if (!(typeof(onloadHandle)==="undefined" || typeof(onloadHandle)==="function")) throw "TypeError: Expected Function at argument 4, got "+typeof(onloadHandle);
 		this.loaded = false;
 		let p = new Image();
 		p.ipicture = this;
@@ -33,11 +33,12 @@ class CPicture {
 		let isCanvas = HTMLCanvasElement.prototype.isPrototypeOf(img);
 		let c = document.createElement("canvas");
 		c.cpicture = this;
-		c.ct = c.getContext("2d")
+		c.ct = c.getContext("2d");
 		c.width = img.width;
 		c.height = img.height;
 		this.width = img.width;
 		this.height = img.height;
+		this.ipicture = img;
 		this.canvas = c;
 		this.loaded = false;
 		if (!isCanvas && img.loaded!==true) {
@@ -68,10 +69,95 @@ class CPicture {
 		}
 		ct.putImageData(data, 0, 0);
 	}
+	rotate(angle, offsetX, offsetY) {				//slow
+		if (!(typeof(angle)==="number")) throw "TypeError: Expected Number at argument 1, got "+typeof(angle);
+		offsetX = offsetX || this.width/2;
+		offsetY = offsetY || this.height/2;
+
+		let c = document.createElement("canvas");
+		c.width = this.width;
+		c.height = this.height;
+		c.ct = c.getContext("2d");
+		c.ct.drawImage(this.canvas, 0, 0);
+
+		let ct = this.canvas.ct;
+		ct.clearRect(0,0,this.canvas.width, this.canvas.height);
+		ct.save();
+		ct.translate(offsetX, offsetY);
+		ct.rotate(angle);
+		ct.translate(-offsetX, -offsetY);
+		ct.drawImage(c, 0, 0, this.width, this.height);
+		ct.restore();
+		
+	}
 	HELP() {
 		let text = "";
-		text += "new CPicture(img) : creates CPicture object. img - IPicture object\r\n"
-		text += ".multiply(color) : multiply every pixel of current picture on color (color : 0xAARRGGBB)\r\n"
+		text += "new CPicture(img) : creates CPicture object. img - IPicture object\r\n";
+		text += ".multiply(color) : multiply every pixel of current picture on color (color : 0xAARRGGBB)\r\n";
+		return text;
+	}
+}
+
+class SVGPicture {
+	constructor(svg, width, height, manualUpdate) {
+		if (!((HTMLElement.prototype.isPrototypeOf(svg) && svg.tagName.toUpperCase()==="SVG") || SVGSVGElement.prototype.isPrototypeOf(svg) || typeof(svg)==="string")) throw "TypeError: Expected <svg> or string at argument 1, got "+typeof(svg);
+		this.manualUpdate = manualUpdate || false;
+		return this.updateSVG(svg, width, height);
+	}
+	updateSVG(svg, width, height) {
+		if (!((HTMLElement.prototype.isPrototypeOf(svg) && svg.tagName.toUpperCase()==="SVG") || SVGSVGElement.prototype.isPrototypeOf(svg) || typeof(svg)==="string")) throw "TypeError: Expected <svg> or string at argument 1, got "+typeof(svg);
+		if (typeof(svg)==="string") {
+			let div = document.createElement("div");
+			div.innerHTML = svg;
+			svg = div.querySelector("svg")
+		}
+		if (!((HTMLElement.prototype.isPrototypeOf(svg) && svg.tagName.toUpperCase()==="SVG") || SVGSVGElement.prototype.isPrototypeOf(svg))) throw "Error: Cannot create <svg> from string";
+		
+		this.svgElement = svg;
+		if (parseInt(width)) svg.setAttribute("width",parseInt(width)+"px");
+		if (parseInt(height)) svg.setAttribute("height",parseInt(height)+"px");
+		
+		this.width = svg.width.baseVal.value;
+		this.height = svg.height.baseVal.value;
+
+		if (!this.manualUpdate) this.updateIPicture();
+		
+		return this;
+	}
+	updateIPicture() {
+		let fOnIPictureLoad = function() {
+			this.ipicture.svgpicture.ipicture = this.ipicture;
+		};
+		let ipicture = new IPicture("data:image/svg+xml;utf8,"+this.svgElement.outerHTML, this.width, this.height, fOnIPictureLoad);
+		ipicture.svgpicture = this;
+		return true;
+	}
+	rotate(deg, x=0, y=0) {
+		let len = this.svgElement.transform.baseVal.numberOfItems;
+		let exists = false;
+		for (let i=0; i<len; i++) {
+			let t = this.svgElement.transform.baseVal.getItem(i);
+			if (t.type === SVGTransform.SVG_TRANSFORM_ROTATE) {
+				t.setRotate(deg,x,y);
+				exists = true;
+				break;
+			}
+		}
+		if (!exists) {
+			let t = this.svgElement.createSVGTransform();
+			t.setRotate(deg, x, y);
+			this.svgElement.transform.baseVal.appendItem(t);
+		}
+
+		if (!this.manualUpdate) this.updateIPicture();
+
+		return true;
+	}
+	HELP() {
+		let text = "";
+		text += "new SVGPicture(svg, width, height, manualUpdate) : creates SVGPicture object. svg - <svg> element or string; width,height - size; manualUpdate - IPicture (inside SVGPicture) will not update automatic\r\n";
+		text += ".updateSVG(svg, width, height) : like constructor (prevent blinking)\r\n";
+		text += ".updateIPicture() : update IPicture inside";
 		return text;
 	}
 }
@@ -103,13 +189,21 @@ class Vector2D {
 	length() {
 		return Math.sqrt(this.x*this.x+this.y*this.y);
 	}
+	toMap() {
+		return {"x":this.x, "y":this.y};
+	}
+	toList() {
+		return [this.x, this.y];
+	}
 	HELP() {
 		let text = "";
-		text += "new Vector2D(x,y) : creates Vector2D object. x,y - position\r\n"
-		text += ".plus(vct) : like self+vct. vct - Vector2D object\r\n"
-		text += ".minus(vct) : like self-vct. vct - Vector2D object\r\n"
-		text += ".multiply(n) : like self*n. n - number\r\n"
-		text += ".divide(n) : like self/n. n - number"
+		text += "new Vector2D(x,y) : creates Vector2D object. x,y - position\r\n";
+		text += ".plus(vct) : like self+vct. vct - Vector2D object\r\n";
+		text += ".minus(vct) : like self-vct. vct - Vector2D object\r\n";
+		text += ".multiply(n) : like self*n. n - number\r\n";
+		text += ".divide(n) : like self/n. n - number\r\n";
+		text += ".toMap() : returns map from vector\r\n";
+		text += ".toList() : returns list from vector\r\n";
 		return text;
 	}
 }
