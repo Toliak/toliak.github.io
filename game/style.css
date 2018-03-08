@@ -10,5 +10,8 @@ canvas {
 }
 
 body {
-	background-color: #f0f0f0;
+	background-color: #ffffff;
+	overflow: hidden;
+	height: 100vh;
+	width: 100vw;
 }
