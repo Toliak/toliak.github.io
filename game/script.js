@@ -3,7 +3,7 @@ let $$ = (x) => document.querySelectorAll(x);
 
 let CANVAS, CTX;
 
-function onLoad(e,t,w,h) {
+window.onload = function(e,t,w=6,h=6) {
     t = this || t;
     e = event || e;
 
