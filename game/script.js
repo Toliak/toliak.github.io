@@ -52,10 +52,28 @@ function ajax_loader(data_list, addFunction, readyFunction) {
 }
 
 function game_init(w,h) {
+    ajax_loader([
+            ["src/corner_pattern.svg", "corner_pattern"],
+            ["src/line_pattern.svg", "line_pattern"],
+            ["src/empty_pattern.svg", "empty_pattern"],
+            ["src/active_line.svg", "active_line"],
+            ["src/wall_pattern.svg", "wall_pattern"],
+        ],
+        function(file_url, key, response) {
+            data.svgs[key] = new SVGPicture(response, data.pattern.width, data.pattern.height);
+        },
+        function() {
+            requestAnimationFrame(game_render);
+        }
+    );
+
     CANVAS.game_data = {};
     let data = CANVAS.game_data;        //pointer
+    data.level_complete = false;
     data.width = w;
     data.height = h;
+    data.start = Math.round(Math.random()*(h-1));
+    data.stop = Math.round(Math.random()*(h-1));
     data.right_panel = {};
     data.right_panel.width = 120;
     data.right_panel.height = CANVAS.height;
@@ -65,21 +83,18 @@ function game_init(w,h) {
     data.pattern.height = 80;
     data.pattern.selected = 0;
     data.pattern.list = {};         //не совсем list
-    data.pattern.list["l-h"] = 10;
-    data.pattern.list["l-v"] = 15;
-    data.pattern.list["c-ur"] = 8;
+    data.pattern.list["l-h"] = 0;
+    data.pattern.list["l-v"] = 0;
+    data.pattern.list["c-ur"] = 0;
+    data.pattern.list["c-lu"] = 0;
+    data.pattern.list["c-dl"] = 0;
+    data.pattern.list["c-rd"] = 0;
     data.position_over = {"x":-1,"y":-1};
     data.positions = [];
-    for (let y=0; y<data.height; y++) {
-        data.positions[y] = [];
-        for (let x=0; x<data.width; x++) {
-            let obj = {};
-            obj.pattern = "e";
-            obj.position = {"x":0, "y":0};
-            data.positions[y][x] = obj;
-        }
-    }
-    window.addEventListener("wheel", function() {
+    game_setField(data.positions, data);
+
+    data.events = {};
+    data.events.wheel = function() {
         if (event.wheelDelta < 0) {
             data.pattern.selected++;
             if (data.pattern.selected >= Object.keys(data.pattern.list).length) data.pattern.selected = 0;
@@ -87,16 +102,16 @@ function game_init(w,h) {
             data.pattern.selected--;
             if (data.pattern.selected < 0) data.pattern.selected = Object.keys(data.pattern.list).length-1;
         }
-    });
-    CANVAS.addEventListener("mousemove", function () {
+    };
+    data.events.mousemove = function () {
         let cx = event.clientX;
         let cy = event.clientY;
         for (let y=0; y<data.height; y++) {
             let localy = data.positions[y][0].position.y;
-            if (cy >= localy && cy <= localy+data.pattern.renger_size) {
+            if (cy >= localy && cy <= localy+data.pattern.render_size) {
                 for (let x = 0; x < data.width; x++) {
                     let localx = data.positions[y][x].position.x;
-                    if (cx >= localx && cx <= localx+data.pattern.renger_size) {
+                    if (cx >= localx && cx <= localx+data.pattern.render_size) {
                         data.position_over = {"x":x, "y":y};
                         break;
                     }
@@ -104,12 +119,13 @@ function game_init(w,h) {
                 break;
             }
         }
-    });
-    CANVAS.addEventListener("click", function() {
+    };
+    data.events.click = function() {
         if (event.which===1) {
             //place
             if (data.position_over.x===-1 || data.position_over.y === -1) return false;
             let p_data = data.positions[data.position_over.y][data.position_over.x];        //pointer, i guess
+            if (p_data.pattern === "w") return false;
             let iter = (function() {
                 let counter = 0;
                 for (let i in data.pattern.list) {
@@ -123,36 +139,173 @@ function game_init(w,h) {
                 return false;
             }
             data.pattern.list[iter]--;
-            if (p_data.pattern!=="e") data.pattern.list[p_data.pattern]++;
+            if (p_data.pattern !== "e") data.pattern.list[p_data.pattern]++;
             p_data.pattern = iter;
         } else if (event.which===2) {
-            //remove
-            if (data.position_over.x===-1 || data.position_over.y === -1) return false;
 
         }
-    });
-    if (CANVAS.addEventListener) { // IE >= 9; other browsers
-        CANVAS.addEventListener('contextmenu', function(e) {      //prever RMB menu
-            e.preventDefault();
-        }, false);
-    } else { // IE < 9
-        CANVAS.attachEvent('oncontextmenu', function() {
-            window.event.returnValue = false;
-        });
+    };
+    data.events.contextmenu = function() {
+        event.preventDefault();
+        //remove
+        if (data.position_over.x===-1 || data.position_over.y === -1) return false;
+        let p_data = data.positions[data.position_over.y][data.position_over.x];        //pointer, i guess
+        if (p_data.pattern === "e") return true;
+        if (p_data.pattern === "w") return false;
+        data.pattern.list[p_data.pattern]++;
+        p_data.pattern = "e";
+    };
+    window.addEventListener("wheel", data.events.wheel);                    //select pattern
+    CANVAS.addEventListener("mousemove", data.events.mousemove);            //highlight
+    CANVAS.addEventListener("click", data.events.click);                    //place pattern
+    CANVAS.addEventListener('contextmenu', data.events.contextmenu);        //prevent RMB menu
+}
+
+function game_reload() {
+    let data = CANVAS.game_data;        //pointer
+    data.level_complete = false;
+    data.start = Math.round(Math.random()*(data.height-1));
+    data.stop = Math.round(Math.random()*(data.height-1));
+    data.pattern.selected = 0;
+    data.pattern.list = {};         //не совсем list
+    data.pattern.list["l-h"] = 0;
+    data.pattern.list["l-v"] = 0;
+    data.pattern.list["c-ur"] = 0;
+    data.pattern.list["c-lu"] = 0;
+    data.pattern.list["c-dl"] = 0;
+    data.pattern.list["c-rd"] = 0;
+    data.position_over = {"x":-1,"y":-1};
+    data.positions = [];
+    game_setField(data.positions, data);
+
+
+    window.removeEventListener("wheel", data.events.wheel);
+    CANVAS.removeEventListener("mousemove", data.events.mousemove);
+    CANVAS.removeEventListener("click", data.events.click);
+    CANVAS.removeEventListener('contextmenu', data.events.contextmenu);
+    window.addEventListener("wheel", data.events.wheel);
+    CANVAS.addEventListener("mousemove", data.events.mousemove);
+    CANVAS.addEventListener("click", data.events.click);
+    CANVAS.addEventListener('contextmenu', data.events.contextmenu);
+}
+
+function game_setField(field, data) {
+    //create path
+    for (let y=0; y<data.height; y++) {
+        field[y] = [];
+        for (let x=0; x<data.width; x++) {
+            let obj = {};
+            obj.active = false;
+            obj.path = false;
+            obj.position = {"x":0, "y":0};
+            field[y][x] = obj;
+        }
+    }
+    let px=0, py=data.start;
+    //field[py][0].path = true;
+    let line = "right";
+    let h=0, v=0, ur=0, lu=0, dl=0, rd=0;
+    while (px!==data.width-1) {
+        let dx = (Math.round(Math.random()) === 0) ? 0 : 1;
+        if (py===0 && (field[1][px].path || line==="up")) dx=1;
+        else if (py===data.height-1 && (field[data.height-2][px].path || line==="down")) dx=1;
+        else if ((py>0 && py<data.height-1) && field[py-1][px].path && field[py+1][px].path) dx=1;
+        if (dx===1) {
+            if (!field[py]) throw py;
+            field[py][px].path = true;
+            px+=dx;
+            if (px>=data.width) break;
+            if (line==="right") {
+                data.pattern.list["l-h"]++;
+            } else if (line==="up") {
+                data.pattern.list["c-rd"]++;
+            } else if (line==="down") {
+                data.pattern.list["c-ur"]++;
+            }
+            line = "right";
+        } else {
+            let dy = (Math.round(Math.random()) === 0) ? 1 : -1;
+            if (!field[py]) throw py;
+            field[py][px].path = true;
+            if (line==="up" || line==="down") {
+                data.pattern.list["l-v"]++;
+                py += (line==="up") ? -1 : +1;
+            } else if (line==="right") {
+                if (py===0) {
+                    dy = +1;
+                } else if (py===data.height-1) {
+                    dy = -1;
+                }
+                if (dy===-1) {
+                    line="up";
+                    data.pattern.list["c-lu"]++;
+                    py--;
+                } else {
+                    line="down";
+                    data.pattern.list["c-dl"]++;
+                    py++;
+                }
+            }
+
+        }
+    }
+    if (py!==data.stop) {
+        while (py!==data.stop) {
+            let dy = (py<data.stop) ? 1 : -1;
+            field[py][px].path = true;
+            py+=dy;
+            if (line==="up" || line==="down") {
+                data.pattern.list["l-v"]++;
+            } else {
+                if (dy===-1) {
+                    line="up";
+                    data.pattern.list["c-lu"]++;
+                } else {
+                    line="down";
+                    data.pattern.list["c-dl"]++;
+                }
+            }
+        }
+    }
+    if (line==="right") {
+        data.pattern.list["l-h"]++;
+    } else if (line==="up") {
+        data.pattern.list["c-rd"]++;
+    } else if (line==="down") {
+        data.pattern.list["c-ur"]++;
+    }
+    field[data.stop][px].path = true;
+
+    for (let y=0; y<data.height; y++) {
+        for (let x=0; x<data.width; x++) {
+            if (field[y][x].path) {
+                field[y][x].pattern="e";
+                continue;
+            }
+            field[y][x].pattern = (Math.round(Math.random()*(100)) < 35) ? "w" : "e";
+        }
     }
 
-    ajax_loader([
-            ["src/corner_pattern.svg", "corner_pattern"],
-            ["src/line_pattern.svg", "line_pattern"],
-            ["src/empty_pattern.svg", "empty_pattern"],
-        ],
-        function(file_url, key, response) {
-            data.svgs[key] = new SVGPicture(response, data.pattern.width, data.pattern.height);
-        },
-        function() {
-            requestAnimationFrame(game_render);
-        }
-    );
+    for (let i in data.pattern.list){
+        if (data.pattern.list.hasOwnProperty(i) && data.pattern.list[i]===0) delete data.pattern.list[i];
+    }
+
+}
+
+function game_level_complete() {
+    let data = CANVAS.game_data;
+    window.removeEventListener("wheel", data.events.wheel);
+    //CANVAS.removeEventListener("mousemove", data.events.mousemove);
+    CANVAS.removeEventListener("click", data.events.click);
+    CANVAS.removeEventListener('contextmenu', data.events.contextmenu);
+
+    data.level_complete = true;
+
+    //data.svgs.active_line.svgElement.querySelectorAll("*").forEach(function(item) {item.setAttribute("stroke", "#00ff03");});
+    //data.svgs.active_line.updateIPicture();
+
+    //TODO: load new level
+    game_reload();
 }
 
 function game_render() {
@@ -183,8 +336,8 @@ function game_render() {
                 "h": 0,
                 "v": Math.PI/2,
                 "ur": 0,
-                "rd": -Math.PI/2,
-                "lu": Math.PI/2,
+                "rd": Math.PI/2,
+                "lu": -Math.PI/2,
                 "dl": Math.PI,
             }[props[2]];
 
@@ -198,8 +351,8 @@ function game_render() {
             CTX.restore();
 
             CANVAS.style.letterSpacing = "-1px";
-            CTX.font = "15px Arial";
-            CTX.fillStyle = "#376471";
+            CTX.font = "bold 15px Arial";
+            CTX.fillStyle = "#000000";
             CTX.textAlign = "left";
             CTX.fillText(p, patternx + patternh-2, patterny + patternh);
             counter++;
@@ -211,7 +364,7 @@ function game_render() {
     let empty_width = CANVAS.width - data.right_panel.width - margin_side*2;
     let patternw = empty_width/data.width;
     let patternh = Math.min(patternw, CANVAS.height/data.height);
-    data.pattern.renger_size = patternh;
+    data.pattern.render_size = patternh;
     let play_width = Math.min(empty_width, patternh*data.width);
     let playh = Math.min(CANVAS.height, patternh*data.height);
     for (let y=0; y<data.height; y++) {
@@ -228,6 +381,8 @@ function game_render() {
             }
             if (data.positions[y][x].pattern === "e") {
                 CTX.drawImage(data.svgs.empty_pattern.ipicture.image, px, py, patternh, patternh);
+            } else if (data.positions[y][x].pattern === "w") {
+                CTX.drawImage(data.svgs.wall_pattern.ipicture.image, px, py, patternh, patternh);
             } else {
                 let props = data.positions[y][x].pattern.match(/([^-]+)-([^$]+)$/);
                 let img = (props[1]==="l") ? data.svgs.line_pattern.ipicture.image : data.svgs.corner_pattern.ipicture.image;
@@ -235,8 +390,8 @@ function game_render() {
                     "h": 0,
                     "v": Math.PI/2,
                     "ur": 0,
-                    "rd": -Math.PI/2,
-                    "lu": Math.PI/2,
+                    "rd": Math.PI/2,
+                    "lu": -Math.PI/2,
                     "dl": Math.PI,
                 }[props[2]];
                 CTX.save();
@@ -248,6 +403,106 @@ function game_render() {
             }
             data.positions[y][x].position = {"x":px, "y":py};
         }
+    }
+
+    //drawing active line
+    let ax = 0, ay = data.start;
+    let line_type="right";
+    let prevx=-1, prevy=data.start;
+    while (true) {
+        if ((0<=ax && ax<data.width) && (0<=ay && ay<data.height) && data.positions[ay][ax].active === true) break;
+        //if ((0<=prevx && prevx<data.width) && (0<=prevy && prevy<data.height) && data.positions[prevy][prevx].pattern === "e") break;
+        let localx, localy;
+        if (prevx < 0) {          //if x<0, then 0<=y<data.height
+            localx = data.positions[prevy][0].position.x - data.pattern.render_size;
+            localy = data.positions[prevy][0].position.y;
+        }
+        else if (prevx >= data.width) {
+            localx = data.positions[prevy][data.width-1].position.x;
+            localy = data.positions[prevy][0].position.y;
+        }
+        else {
+            if (prevy < 0) {
+                localx = data.positions[0][prevx].position.x;
+                localy = data.positions[0][prevx].position.y;
+            } else if (prevy >= data.height) {
+                localx = data.positions[0][prevx].position.x;
+                localy = data.positions[data.height-1][prevx].position.y + data.pattern.render_size;
+            } else {
+                localx = data.positions[prevy][prevx].position.x;
+                localy = data.positions[prevy][prevx].position.y;
+            }
+        }
+        if (line_type==="right") localx+=data.pattern.render_size/2;
+        else if (line_type==="left") localx-=data.pattern.render_size/2;
+        else if (line_type==="up") localy-=data.pattern.render_size/2;
+        else if (line_type==="down") localy+=data.pattern.render_size/2;
+
+        CTX.save();
+        let tmpx = localx + data.pattern.render_size/2;
+        let tmpy = localy + data.pattern.render_size/2;
+        CTX.translate(tmpx, tmpy);
+        if (line_type==="up" || line_type==="down") {
+            CTX.rotate((line_type==="up") ? -Math.PI/2 : +Math.PI/2);
+        } else if (line_type==="left") {
+            CTX.rotate(Math.PI);
+        }
+        CTX.translate(-tmpx, -tmpy);
+        CTX.drawImage(data.svgs.active_line.ipicture.image, localx, localy, data.pattern.render_size, data.pattern.render_size);
+        CTX.restore();
+
+        prevx = ax;
+        prevy = ay;
+        if (ax>=data.width && ay===data.stop) {
+            game_level_complete();
+            break;
+        } else if (typeof(data.positions[ay])==="undefined" || typeof(data.positions[ay][ax])==="undefined") break;
+        let pattern = data.positions[ay][ax].pattern;
+        if (pattern==="e" || pattern==="w") break;
+        let props = pattern.match(/([^-]+)-([^$]+)$/);
+        if (props[2]==="h" && (line_type==="left" || line_type==="right")) {
+            ax += (line_type==="left") ? -1 : +1;
+        } else if (props[2]==="v" && (line_type==="up" || line_type==="down")) {
+            ay += (line_type==="down") ? +1 : -1
+        } else if (props[2]==="lu" && (line_type==="down" || line_type==="right")) {
+            if (line_type === "down") {
+                line_type = "left";
+                ax--;
+            } else {
+                line_type = "up";
+                ay--;
+            }
+        } else if (props[2]==="ur" && (line_type==="down" || line_type==="left")) {
+            if (line_type === "down") {
+                line_type = "right";
+                ax++;
+            } else {
+                line_type = "up";
+                ay--;
+            }
+        } else if (props[2]==="rd" && (line_type==="up" || line_type==="left")) {
+            if (line_type === "up") {
+                line_type = "right";
+                ax++;
+            } else {
+                line_type = "down";
+                ay++;
+            }
+        } else if (props[2]==="dl" && (line_type==="up" || line_type==="right")) {
+            if (line_type === "up") {
+                line_type = "left";
+                ax--;
+            } else {
+                line_type = "down";
+                ay++;
+            }
+        } else break;
+    }
+
+    if (!data.level_complete) {
+        let localx = data.positions[data.stop][data.width-1].position.x + data.pattern.render_size/2;
+        let localy = data.positions[data.stop][data.width-1].position.y;
+        CTX.drawImage(data.svgs.active_line.ipicture.image, localx, localy, data.pattern.render_size, data.pattern.render_size);
     }
 
     requestAnimationFrame(game_render);
