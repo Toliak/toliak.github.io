@@ -18,7 +18,7 @@ window.onload = function(e,t,w=6,h=6) {
     CANVAS.height = document.body.offsetHeight;
 
     game_init(w,h);
-}
+};
 
 function ajax_loader(data_list, addFunction, readyFunction) {
     /*
@@ -310,6 +310,12 @@ function game_level_complete() {
 
 function game_render() {
     let data = CANVAS.game_data;
+    //main check
+    for (let i in data.svgs) {
+        if (data.svgs.hasOwnProperty(i) && ((typeof(data.svgs[i].ipicture) === "undefined") || (typeof(data.svgs[i].ipicture.image) === "undefined")))
+            return requestAnimationFrame(game_render);
+    }
+
     CTX.clearRect(0,0, CANVAS.width, CANVAS.height);
 
     //drawing select (right) panel
