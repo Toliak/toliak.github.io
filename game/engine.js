@@ -207,3 +207,34 @@ class Vector2D {
 		return text;
 	}
 }
+
+function ajax_loader(data_list, addFunction, readyFunction) {
+    /*
+    data_list = [["file_url", "key"], ...]
+    addFunction(file_url, key, response) : function to add response
+    readyFunction() : will call after getting all files
+    */
+	if (!Function.prototype.isPrototypeOf(addFunction)) throw "Expected Function at argument 2, got" + typeof (addFunction);
+	if (!Function.prototype.isPrototypeOf(readyFunction)) throw "Expected Function at argument 3, got" + typeof (readyFunction);
+
+	let xhr = new XMLHttpRequest();
+
+	let d = data_list.pop();
+	xhr.open("GET", d[0]);
+	xhr.data_file_url = d[0];
+	xhr.data_key = d[1];
+	xhr.onreadystatechange = function () {
+		if (this.readyState !== 4) return false;
+		addFunction(xhr.data_file_url, xhr.data_key, this.response);
+		if (data_list.length > 0) {
+			let d = data_list.pop();
+			xhr.open("GET", d[0]);
+			xhr.data_file_url = d[0];
+			xhr.data_key = d[1];
+			xhr.send();
+		} else {
+			return readyFunction();
+		}
+	};
+	xhr.send();
+}
