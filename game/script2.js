@@ -165,7 +165,7 @@ function game_init() {
 				CANVAS.generateLevel();
 			}
 		}
-	}
+	};
 
 	CANVAS.addEventListener("mousemove", data.events.mousemove);            //highlight
 	CANVAS.addEventListener("click", data.events.click);

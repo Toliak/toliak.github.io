@@ -120,10 +120,20 @@ function generateField(w, h) {
 function clearField(field, path) {
     for (let i=0; i<path.length; i++) {
         let c = path[i];
-        for (let y=c.y; y>0; y--) {
-            field[c.x][y] = field[c.x][y-1];
+        field[c.x][c.y] = null;
+    }
+    for (let x=0; x<field.length; x++) {
+        for (let y=0; y<field[x].length; y++) {
+            if (field[x][y]===null) {
+                field[x].splice(y, 1);
+                y--;
+            }
         }
-        field[c.x][0] = (["icon_grass", "icon_wheat", "icon_potato", "icon_carrot"])[Math.floor(Math.random()*4)];
+    }
+    for (let x=0; x<field.length; x++) {
+        while (field[x].length < HEIGHT) {
+            field[x].unshift((["icon_grass", "icon_wheat", "icon_potato", "icon_carrot"])[Math.floor(Math.random()*4)]);
+        }
     }
     return field;
 }
