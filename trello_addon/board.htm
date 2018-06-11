@@ -20,10 +20,11 @@
             if (board.length < 2) return (location.href = `index.htm`);
 
             Trello.get(`boards/${board}`, function(v) {
-                $(".container > h1").text(`${v.name} : roadmap`);
+                $("#trello-board-name").text(`${v.name} : roadmap`);
                 Trello.get(`boards/${board}/lists`, function (v) {
                     let name_row = document.createElement("div");
                     name_row.classList.add("row");
+                    name_row.classList.add("font-weight-bold");
                     $("#trello-map").append(name_row);
                     let pre_col = document.createElement("div");
                     pre_col.classList.add("col-sm-2");
@@ -44,6 +45,7 @@
                         name_col.classList.add("col-sm-2");
                         name_col.classList.add("border");
                         name_col.classList.add("border-right-0");
+                        name_col.classList.add("font-weight-bold");
 
                         let table = document.createElement("table");
                         $(table).css("height", "100%");
@@ -94,6 +96,7 @@
                             col.classList.add("text-center");
                             if (i < cards_k.length) {
                                 let d = new Date(Date.parse(card.due));
+                                if (d.getTime() < Date.now()) col.classList.add("text-danger");
                                 $(col).text(d.toLocaleString());
                             } else {
                                 $(col).text("N/A");
@@ -104,8 +107,8 @@
                                 ul.classList.add("list-group");
                                 let col = document.createElement("div");
                                 col.classList.add("col");
-                                col.classList.add("border");
-                                if (i + (lasts.length > 0) < cards_k.length - 1) col.classList.add("border-right-0");
+                                col.classList.add("border-left");
+                                if (!(i + (lasts.length > 0) < cards_k.length - 1)) col.classList.add("border-right");
                                 $(col).append(ul);
                                 $(`#trello-map > .row:nth-of-type(${j + 2})`).append(col);
                             }
@@ -116,11 +119,91 @@
                             let _cards = cards.get(cards_k[i]);
                             for (let j = 0; j < _cards.length; j++) {
                                 let card = _cards[j];
+                                //onsole.log(card);
                                 let v_index = lists_k_s[card.idList];
 
                                 let li = document.createElement("li");
                                 li.classList.add("list-group-item");
-                                $(li).text(card.name);
+                                if (card.dueComplete === true) li.classList.add("list-group-item-success");
+                                let p = document.createElement("p");
+                                let a = document.createElement("a");
+                                a.classList.add("text-dark");
+                                $(a).text(card.name + " ");
+                                $(a).attr("href", card.shortUrl);
+                                $(a).attr("target", "_blank");
+                                $(p).append(a);
+                                $(li).append(p);
+                                p.addLabel = function(color, text = "") {
+                                    let span = document.createElement("span");
+                                    span.classList.add("badge");
+
+                                    if (typeof(color) !== "string")
+                                        span.classList.add("badge-light");
+                                    else {
+                                        $(span).css("background-color", color);
+                                        $(span).css("color", "#ffffff");
+                                    }
+
+                                    if (text !== "")
+                                        $(span).text(text);
+                                    else
+                                        $(span).html("&nbsp;&nbsp;&nbsp;&nbsp;");
+                                    $(p).append(span);
+                                    p.innerHTML += " ";
+                                };
+
+                                // put labels
+                                for (let c = 0; c < card.idLabels.length; c++) {
+                                    let lbl = card.idLabels[c];
+                                    Trello.get(`labels/${lbl}`, function(v){
+                                        console.log(v);
+                                        p.addLabel(v.color, v.name);
+                                    });
+                                }
+
+                                // create progress bar
+                                let progress = document.createElement("div");
+                                progress.classList.add("progress");
+                                $(li).append(progress);
+                                let progress_bar = document.createElement("div");
+                                progress_bar.classList.add("progress-bar");
+                                if (card.dueComplete === true) {
+                                    progress_bar.classList.add("bg-success");
+                                    progress_bar.classList.add("progress-bar-striped");
+                                }
+                                $(progress_bar).attr("role", "progressbar");
+                                $(progress_bar).attr("aria-valuemin", "0");
+                                $(progress_bar).attr("aria-valuenow", "0");
+                                $(progress_bar).attr("aria-valuemax", "0");
+                                $(progress).append(progress_bar);
+                                progress.addCheckbox = function(value, maxvalue) {
+                                    if (typeof(value) !== "number") throw "TypeError";
+                                    if (typeof(maxvalue) !== "number") throw "TypeError";
+
+                                    $(progress_bar).attr("aria-valuenow", +$(progress_bar).attr("aria-valuenow") + value);
+                                    $(progress_bar).attr("aria-valuemax", +$(progress_bar).attr("aria-valuemax") + maxvalue);
+
+                                    $(progress_bar).css("width", `${+$(progress_bar).attr("aria-valuenow")/+$(progress_bar).attr("aria-valuemax") * 100}%`)
+                                };
+
+                                // put checkboxes into progress bar
+                                for (let c = 0; c < card.idChecklists.length; c++) {
+                                    let cid = card.idChecklists[c];
+                                    Trello.get(`checklists/${cid}`, function(v) {
+                                        let val = 0, mval = 0;
+                                        for (let i = 0; i < v.checkItems.length; i++) {
+                                            let item = v.checkItems[i];
+                                            if (item.state === "complete") {
+                                                val++;
+                                                mval++;
+                                            } else {
+                                                mval++;
+                                            }
+                                        }
+                                        progress.addCheckbox(val, mval);
+                                    });
+                                }
+
                                 $(`#trello-map > .row:nth-of-type(${v_index + 2}) > .col:nth-of-type(${i + 2}) > ul`).append(li);
                             }
                         }
@@ -149,10 +232,12 @@
     </script>
 </head>
 <body>
-    <div class="container">
-        <h1 class="border-bottom"></h1>
-        <div id="trello-map" class="container">
+    <div class="container-fluid">
+        <h1 id="trello-board-name" class="border-bottom"></h1>
+        <div class="container-fluid" style="overflow-x: scroll;">
+            <div id="trello-map" style="width:1500px;height:500px;">
 
+            </div>
         </div>
     </div>
 
