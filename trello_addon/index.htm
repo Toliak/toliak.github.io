@@ -32,195 +32,99 @@
                 return card;
             }
 
-            $("#trello-auth").modal("show");
             $("#main-carousel").carousel("pause");
 
-            $("#trello-auth-button").on("click", function() {
-                let opts = {
-                    "type": "popup",
-                    "name": "toliak.github.io",
-                    "expiration": "1hour",
-                    "success": function() {
-                        $("#trello-auth").modal("hide");
+            let opts = {
+                "type": "popup",
+                "name": "toliak.github.io",
+                "expiration": "1hour",
+                "success": function() {
+                    $("#trello-auth").modal("hide");
 
-                        Trello.get("members/me/boards", function (v) {
-                            for (let i = 0; i < v.length; i++) {
-                                let vi = v[i];
+                    Trello.get("members/me/boards", function (v) {
+                        for (let i = 0; i < v.length; i++) {
+                            let vi = v[i];
 
-                                let col = document.createElement("div");
-                                col.classList.add("col-sm-4");
+                            let col = document.createElement("div");
+                            col.classList.add("col-sm-4");
 
-                                let card = createCard(vi.name, "");
-                                let link = document.createElement("a");
-                                $(link).attr("href", vi.shortUrl);
-                                $(link).attr("target", "_blank");
-                                $(link).text("Link");
-                                $(card).find(".card-text").append(link);
-                                let button = document.createElement("a");
-                                $(button).attr("href","#");
-                                button.classList.add("btn");
-                                button.classList.add("btn-primary");
-                                $(button).text("Select");
-                                $(button).click(function() {
-                                    $("#main-carousel > .carousel-inner > .carousel-item:nth-of-type(2) h1").text(vi.name);
+                            let card = createCard("", "");
+                            let title = $(card).find(".card-title");
+                            let link = document.createElement("a");
+                            $(link).attr("href", vi.shortUrl);
+                            $(link).attr("target", "_blank");
+                            $(link).text(vi.name);
+                            $(card).find(".card-title").append(link);
+                            let button = document.createElement("a");
+                            $(button).attr("href", `board.htm?board=${vi.shortLink}`);
+                            button.classList.add("btn");
+                            button.classList.add("btn-primary");
+                            $(button).text("Select");
+                            $(card).find(".card-body").append(button);
+                            $(card).trello = vi;
 
-                                    Trello.get(`boards/${vi.shortLink}/lists`, function (v) {
-                                        let name_row = document.createElement("div");
-                                        name_row.classList.add("row");
-                                        $("#trello-map").append(name_row);
-                                        let pre_col = document.createElement("div");
-                                        pre_col.classList.add("col-sm-1");
-                                        $(pre_col).text("");
-                                        $(name_row).append(pre_col);
-
-                                        let lists = new Map();
-                                        for (let i = 0; i < v.length; i++) {
-                                            let vi = v[i];
-                                            lists.set(vi.id, vi);
-
-                                            let row = document.createElement("div");
-                                            row.classList.add("row");
-                                            $("#trello-map").append(row);
-
-                                            let name_col = document.createElement("div");
-                                            name_col.classList.add("col-sm-1");
-                                            name_col.classList.add("border");
-                                            name_col.classList.add("border-right-0");
-                                            $(name_col).text(vi.name);
-                                            $(row).append(name_col);
-                                        }
-
-                                        Trello.get(`boards/${vi.shortLink}/cards`, function (v) {
-                                            let cards = new Map();
-                                            let lasts = [];
-                                            for (let i = 0; i < v.length; i++) {
-                                                let vi = v[i];
-
-                                                if (typeof(vi.due) === "string") {
-                                                    let d = Date.parse(vi.due);
-                                                    if (cards.get(d)) {
-                                                        cards.get(d).push(vi);
-                                                    } else {
-                                                        cards.set(d, [vi]);
-                                                    }
-                                                } else {
-                                                    lasts.push(vi);
-                                                }
-                                            }
-
-                                            let lists_k = Array.from(lists.keys()).sort();
-                                            let lists_k_s = {};
-                                            for (let i = 0; i < lists_k.length; i++) lists_k_s[lists_k[i]] = i;
-
-                                            let cards_k = Array.from(cards.keys()).sort();
-                                            for (let i = 0; i < cards_k.length + 1; i++) {
-                                                let card = cards.get(cards_k[i]) ? cards.get(cards_k[i])[0] : lasts;
-                                                let col = document.createElement("div");
-                                                col.classList.add("col");
-                                                //$(col).text(card.due);
-                                                $(col).text("");
-                                                $(name_row).append(col);
-                                                for (let j = 0; j < lists_k.length; j++) {
-                                                    let ul = document.createElement("ul");
-                                                    ul.classList.add("list-group");
-                                                    let col = document.createElement("div");
-                                                    col.classList.add("col");
-                                                    col.classList.add("border");
-                                                    if (i < cards_k.length) col.classList.add("border-right-0");
-                                                    $(col).append(ul);
-                                                    $(`#trello-map > .row:nth-of-type(${j + 2})`).append(col);
-                                                }
-                                            }
-
-                                            for (let i = 0; i < cards_k.length; i++) {
-                                                let _cards = cards.get(cards_k[i]);
-                                                for (let j = 0; j < _cards.length; j++) {
-                                                    let card = _cards[j];
-                                                    let v_index = lists_k_s[card.idList];
-
-                                                    let li = document.createElement("li");
-                                                    li.classList.add("list-group-item");
-                                                    $(li).text(card.name);
-                                                    $(`#trello-map > .row:nth-of-type(${v_index + 2}) > .col:nth-of-type(${i + 2}) > ul`).append(li);
-                                                }
-                                            }
-
-                                            for (let i = 0; i < lasts.length; i++) {
-                                                let card = lasts[i];
-                                                let v_index = lists_k_s[card.idList];
-
-                                                let li = document.createElement("li");
-                                                li.classList.add("list-group-item");
-                                                $(li).text(card.name);
-
-                                                $(`#trello-map > .row:nth-of-type(${v_index + 2}) > .col:last-of-type > ul`).append(li);
-                                            }
-                                        }, function () {
-                                            $("#message-error .modal-body").text("Trello mapping error");
-                                            $("#message-error").modal("show");
-                                        });
-                                    }, function () {
-                                        $("#message-error .modal-body").text("Trello mapping error");
-                                        $("#message-error").modal("show");
-                                    });
-
-
-                                    $("#main-carousel").carousel("next");
-                                });
-                                $(card).find(".card-body").append(button);
-                                $(card).trello = vi;
-
-                                col.append(card);
-                                if (i%3 === 0) {
-                                    let row = document.createElement("div");
-                                    row.classList.add("row");
-                                    $("#trello-boards").append(row);
-                                }
-                                $("#trello-boards > .row:last-of-type").append(col);
+                            col.append(card);
+                            if (i%3 === 0) {
+                                let row = document.createElement("div");
+                                row.classList.add("row");
+                                $("#trello-boards").append(row);
                             }
-                        }, function (e) {
-                            if (e.status === 400 || e.status === 401) {
-                                localStorage.removeItem("trello-token");
-                                opts.persist = false;
-                                Trello.authorize(opts);
-                            } else {
-                                $("#trello-auth").modal("hide");
-                                $("#message-error .modal-body").text("Trello authentication error");
-                                $("#message-error").modal("show");
-                            }
-                        });
-                    },
-                    "error": function() {
-                        $("#trello-auth").modal("hide");
-                        $("#message-error .modal-body").text("Trello authentication error");
-                        $("#message-error").modal("show");
-                    }
+                            $("#trello-boards > .row:last-of-type").append(col);
+                        }
+                    }, function(e) {
+                        if (e.status === 400 || e.status === 401) {
+                            localStorage.removeItem("trello_token");
+                            Trello.deauthorize();
+                            $("#trello-auth").modal("show");
+                        } else {
+                            $("#trello-auth .modal-body:nth-of-type(2) > p").text("Trello authentication error");
+                        }
+                    });
+                }
+            };
+
+            $("#trello-auth-button").click(function() {
+                opts.error = function() {
+                    $("#trello-auth .modal-body:nth-of-type(2) > p").text("Trello authentication error");
                 };
-
                 Trello.authorize(opts);
             });
+
+            $("#trello-board-show").click(function() {
+                let link = $("#trello-board-link");
+                let board = link.val();
+                if (board.length < 2) {
+                    link.get()[0].classList.add("is-invalid");
+                    return false;
+                }
+
+                location.href = `board.htm?board=${board}`;
+            });
+
+            $("#trello-board-link").on("input", function() {
+                if ($(this).val().length < 2)
+                    this.classList.add("is-invalid");
+                else
+                    this.classList.remove("is-invalid");
+            });
+
+            if (localStorage.getItem("trello_token")) {
+                opts.error = function () {
+                    $("#trello-auth .modal-body:nth-of-type(2) > p").text("Wrong token. Try again");
+                };
+                Trello.authorize(opts);
+            } else {
+                $("#trello-auth").modal("show");
+            }
 
         });
     </script>
 </head>
 <body>
-
     <div class="container">
-        <div id="main-carousel" class="carousel slide">
-            <div class="carousel-inner">
-                <div class="carousel-item active">
-                    <h1>Select board</h1>
-                    <div id="trello-boards" class="container">
+        <h1 class="border-bottom">Select board</h1>
+        <div id="trello-boards" class="container">
 
-                    </div>
-                </div>
-                <div class="carousel-item">
-                    <h1></h1>
-                    <div id="trello-map" class="container">
-
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -229,30 +133,20 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="trello-auth-title">Trello authentication required</h5>
+                    <h5 class="modal-title" id="trello-auth-title">Auth</h5>
                 </div>
-                <div class="modal-footer">
-                    <button id="trello-auth-button" type="button" class="btn btn-primary">Auth</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal error -->
-    <div class="modal fade" id="message-error" tabindex="-1" role="dialog" aria-labelledby="message-error-title" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content border-danger">
-                <div class="modal-header">
-                    <h5 class="modal-title text-danger" id="message-error-title">Error</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                <div class="modal-body border-bottom">
+                    <div class="form-group">
+                        <div class="form-group">
+                            <label for="trello-board-link">Public board link</label>
+                            <input type="text" class="form-control" id="trello-board-link" aria-describedby="emailHelp" placeholder="Enter link">
+                        </div>
+                        <button type="button" id="trello-board-show" class="btn btn-primary">Show board</button>
+                    </div>
                 </div>
                 <div class="modal-body">
-                    Text
-                </div>
-                <div class="modal-footer">
-                    <button id="message-error-button" type="button" class="btn btn-secondary" data-dismiss="modal">OK</button>
+                    <p>Trello authentication required to show your boards.</p>
+                    <button type="button" id="trello-auth-button" class="btn btn-secondary">Auth</button>
                 </div>
             </div>
         </div>

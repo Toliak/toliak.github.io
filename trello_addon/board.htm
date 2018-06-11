@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Trello Board</title>
+    <link rel="stylesheet" href="../src/bootstrap.min.css">
+    <style>
+        .row + .row {
+            margin-top: 1rem;
+        }
+    </style>
+    <script src="../src/jquery-3.3.1.min.js"></script>
+    <script src="../src/bootstrap.min.js"></script>
+    <script src="https://trello.com/1/client.js?key=0b710754e2d70514312df179647deff6"></script>
+
+    <script>
+        $(function() {
+            let url = new URL(window.location.href);
+            let board = url.searchParams.get("board");
+            if (board.length < 2) return (location.href = `index.htm`);
+
+            Trello.get(`boards/${board}`, function(v) {
+                $(".container > h1").text(`${v.name} : roadmap`);
+                Trello.get(`boards/${board}/lists`, function (v) {
+                    let name_row = document.createElement("div");
+                    name_row.classList.add("row");
+                    $("#trello-map").append(name_row);
+                    let pre_col = document.createElement("div");
+                    pre_col.classList.add("col-sm-2");
+                    $(pre_col).text("");
+                    $(name_row).append(pre_col);
+
+                    // get lists
+                    let lists = new Map();
+                    for (let i = 0; i < v.length; i++) {
+                        let vi = v[i];
+                        lists.set(vi.id, vi);
+
+                        let row = document.createElement("div");
+                        row.classList.add("row");
+                        $("#trello-map").append(row);
+
+                        let name_col = document.createElement("div");
+                        name_col.classList.add("col-sm-2");
+                        name_col.classList.add("border");
+                        name_col.classList.add("border-right-0");
+
+                        let table = document.createElement("table");
+                        $(table).css("height", "100%");
+                        let tbody = document.createElement("tbody");
+                        $(table).append(tbody);
+                        let tr = document.createElement("tr");
+                        $(tbody).append(tr);
+                        let td = document.createElement("td");
+                        td.classList.add("align-middle");
+                        $(td).text(vi.name);
+                        $(tr).append(td);
+
+                        $(name_col).append(table);
+                        $(row).append(name_col);
+                    }
+
+                    Trello.get(`boards/${board}/cards`, function (v) {
+                        // get cards
+                        let cards = new Map();
+                        let lasts = [];
+                        for (let i = 0; i < v.length; i++) {
+                            let vi = v[i];
+
+                            if (typeof(vi.due) === "string") {
+                                let d = Date.parse(vi.due);
+                                if (cards.get(d)) {
+                                    cards.get(d).push(vi);
+                                } else {
+                                    cards.set(d, [vi]);
+                                }
+                            } else {
+                                lasts.push(vi);
+                            }
+                        }
+
+                        let lists_k = Array.from(lists.keys()).sort();
+                        let lists_k_s = {};
+                        for (let i = 0; i < lists_k.length; i++) lists_k_s[lists_k[i]] = i;
+
+                        //updating cols
+                        let cards_k = Array.from(cards.keys()).sort();
+                        for (let i = 0; i < cards_k.length + (lasts.length > 0); i++) {
+                            let card = cards.get(cards_k[i]) ? cards.get(cards_k[i])[0] : lasts;
+                            let col = document.createElement("div");
+                            col.classList.add("col");
+                            col.classList.add("border");
+                            if (i + (lasts.length > 0) < cards_k.length - 1) col.classList.add("border-right-0");
+                            col.classList.add("text-center");
+                            if (i < cards_k.length) {
+                                let d = new Date(Date.parse(card.due));
+                                $(col).text(d.toLocaleString());
+                            } else {
+                                $(col).text("N/A");
+                            }
+                            $(name_row).append(col);
+                            for (let j = 0; j < lists_k.length; j++) {
+                                let ul = document.createElement("ul");
+                                ul.classList.add("list-group");
+                                let col = document.createElement("div");
+                                col.classList.add("col");
+                                col.classList.add("border");
+                                if (i + (lasts.length > 0) < cards_k.length - 1) col.classList.add("border-right-0");
+                                $(col).append(ul);
+                                $(`#trello-map > .row:nth-of-type(${j + 2})`).append(col);
+                            }
+                        }
+
+                        //put items int cols
+                        for (let i = 0; i < cards_k.length; i++) {
+                            let _cards = cards.get(cards_k[i]);
+                            for (let j = 0; j < _cards.length; j++) {
+                                let card = _cards[j];
+                                let v_index = lists_k_s[card.idList];
+
+                                let li = document.createElement("li");
+                                li.classList.add("list-group-item");
+                                $(li).text(card.name);
+                                $(`#trello-map > .row:nth-of-type(${v_index + 2}) > .col:nth-of-type(${i + 2}) > ul`).append(li);
+                            }
+                        }
+                        for (let i = 0; i < lasts.length; i++) {
+                            let card = lasts[i];
+                            let v_index = lists_k_s[card.idList];
+
+                            let li = document.createElement("li");
+                            li.classList.add("list-group-item");
+                            $(li).text(card.name);
+
+                            $(`#trello-map > .row:nth-of-type(${v_index + 2}) > .col:last-of-type > ul`).append(li);
+                        }
+                    }, function () {
+                        $("#message-error .modal-body").text("Trello mapping error 2");
+                        $("#message-error").modal("show");
+                    });
+                }, function () {
+                    $("#message-error .modal-body").text("Trello mapping error");
+                    $("#message-error").modal("show");
+                });
+            }, function() {
+                return (location.href = `index.htm`);
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="border-bottom"></h1>
+        <div id="trello-map" class="container">
+
+        </div>
+    </div>
+
+    <!-- Modal error -->
+    <div class="modal fade" id="message-error" tabindex="-1" role="dialog" aria-labelledby="message-error-title" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content border-danger">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="message-error-title">Error</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Text
+                </div>
+                <div class="modal-footer">
+                    <button id="message-error-button" type="button" class="btn btn-secondary" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
