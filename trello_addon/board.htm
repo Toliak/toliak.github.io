@@ -5,8 +5,22 @@
     <title>Trello Board</title>
     <link rel="stylesheet" href="../src/bootstrap.min.css">
     <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+            background-color: #e9ecef;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--secondary);
+        }
+
         .row + .row {
             margin-top: 1rem;
+        }
+
+        #trello-map {
+            padding: 15px 0px;
         }
     </style>
     <script src="../src/jquery-3.3.1.min.js"></script>
@@ -44,7 +58,7 @@
                         let name_col = document.createElement("div");
                         name_col.classList.add("col-sm-2");
                         name_col.classList.add("border");
-                        name_col.classList.add("border-right-0");
+                        //name_col.classList.add("border-right-0");
                         name_col.classList.add("font-weight-bold");
 
                         let table = document.createElement("table");
@@ -87,12 +101,13 @@
 
                         //updating cols
                         let cards_k = Array.from(cards.keys()).sort();
+                        $("#trello-map").css("width", `${270*cards_k.length + 170}px`);
                         for (let i = 0; i < cards_k.length + (lasts.length > 0); i++) {
                             let card = cards.get(cards_k[i]) ? cards.get(cards_k[i])[0] : lasts;
                             let col = document.createElement("div");
                             col.classList.add("col");
                             col.classList.add("border");
-                            if (i + (lasts.length > 0) < cards_k.length - 1) col.classList.add("border-right-0");
+                            if (i - (lasts.length > 0) < cards_k.length - 1) col.classList.add("border-right-0");
                             col.classList.add("text-center");
                             if (i < cards_k.length) {
                                 let d = new Date(Date.parse(card.due));
@@ -107,8 +122,8 @@
                                 ul.classList.add("list-group");
                                 let col = document.createElement("div");
                                 col.classList.add("col");
-                                col.classList.add("border-left");
-                                if (!(i + (lasts.length > 0) < cards_k.length - 1)) col.classList.add("border-right");
+                                //col.classList.add("border-left");
+                                //if (i - (lasts.length > 0) < cards_k.length - 1) col.classList.add("border-right-0");
                                 $(col).append(ul);
                                 $(`#trello-map > .row:nth-of-type(${j + 2})`).append(col);
                             }
@@ -171,6 +186,11 @@
                                     progress_bar.classList.add("bg-success");
                                     progress_bar.classList.add("progress-bar-striped");
                                 }
+                                if (card.due && (Date.parse(card.due) < Date.now())) {
+                                    progress_bar.classList.add("bg-danger");
+                                    progress_bar.classList.add("progress-bar-striped");
+                                }
+
                                 $(progress_bar).attr("role", "progressbar");
                                 $(progress_bar).attr("aria-valuemin", "0");
                                 $(progress_bar).attr("aria-valuenow", "0");
@@ -235,7 +255,7 @@
     <div class="container-fluid">
         <h1 id="trello-board-name" class="border-bottom"></h1>
         <div class="container-fluid" style="overflow-x: scroll;">
-            <div id="trello-map" style="width:1500px;height:500px;">
+            <div id="trello-map">
 
             </div>
         </div>
