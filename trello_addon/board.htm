@@ -249,8 +249,11 @@
                 }
             };
 
-            if (!localStorage.getItem("trello_token")) return (location.href = `index.htm`);
-            Trello.authorize(opts);
+            if (localStorage.getItem("trello_token")) {
+                Trello.authorize(opts);
+            } else {
+                opts.success();
+            }
 
         });
     </script>
