@@ -10,15 +10,22 @@
             height: 6px;
             background-color: #e9ecef;
         }
-
         ::-webkit-scrollbar-thumb {
             background-color: var(--secondary);
         }
-
+        body {
+            height: 100vh;
+            overflow-y: hidden;
+        }
         .row + .row {
             margin-top: 1rem;
         }
-
+        #main-container {
+            height: calc(100% - 20px);
+        }
+        #trello-map-container {
+            overflow: auto;
+        }
         #trello-map {
             padding: 15px 0px;
             min-width: 95%;
@@ -41,6 +48,8 @@
                 "success": function () {
                     Trello.get(`boards/${board}`, function (v) {
                         $("#trello-board-name").text(`${v.name} : roadmap`);
+                        setMapContainerHeight();
+
                         Trello.get(`boards/${board}/lists`, function (v) {
                             let name_row = document.createElement("div");
                             name_row.classList.add("row");
@@ -256,12 +265,28 @@
             }
 
         });
+
+        function setMapContainerHeight() {
+            let container = $("#trello-map-container");
+            let parent = container.parent();
+            let h = parent.outerHeight();
+
+            let children = parent.children();
+            for (let i = 0; i < children.length; i++) {
+                let child = $(children[i]);
+                if (child.get()[0] === container.get()[0]) continue;
+                h -= child.outerHeight();
+            }
+
+            container.height(h);
+        }
+        $(window).on("resize", setMapContainerHeight);
     </script>
 </head>
 <body>
-    <div class="container-fluid">
+    <div id="main-container" class="container-fluid">
         <h1 id="trello-board-name" class="border-bottom"></h1>
-        <div class="container-fluid" style="overflow-x: scroll;">
+        <div id="trello-map-container" class="container-fluid">
             <div id="trello-map">
 
             </div>
