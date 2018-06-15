@@ -36,6 +36,7 @@
     <script src="https://trello.com/1/client.js?key=0b710754e2d70514312df179647deff6"></script>
 
     <script>
+        const TRELLO_WAIT = 100;
         $(function() {
             let url = new URL(window.location.href);
             let board = url.searchParams.get("board");
@@ -47,7 +48,7 @@
                 "expiration": "1hour",
                 "success": function () {
                     Trello.get(`boards/${board}`, function (v) {
-                        $("#trello-board-name").text(`${v.name} : roadmap`);
+                        $("#trello-board-name").html(`${v.name}: Roadmap`);
                         setMapContainerHeight();
 
                         Trello.get(`boards/${board}/lists`, function (v) {
@@ -144,7 +145,8 @@
                                     }
                                 }
 
-                                //put items int cols
+                                //put items in cols
+                                let iterations = 1;             // to avoid 429 http error
                                 for (let i = 0; i < cards_k.length + (lasts.length > 0); i++) {
                                     let _cards = (i < cards_k.length) ? cards.get(cards_k[i]) : lasts;
                                     for (let j = 0; j < _cards.length; j++) {
@@ -185,10 +187,13 @@
                                         // put labels
                                         for (let c = 0; c < card.idLabels.length; c++) {
                                             let lbl = card.idLabels[c];
-                                            Trello.get(`labels/${lbl}`, function (v) {
-                                                let text = (v.name.length < 15) ? v.name : v.name.substr(0,12) + "...";
-                                                p.addLabel(v.color, text);
-                                            });
+                                            setTimeout(function() {
+                                                Trello.get(`labels/${lbl}`, function (v) {
+                                                    let text = (v.name.length < 15) ? v.name : v.name.substr(0,12) + "...";
+                                                    p.addLabel(v.color, text);
+                                                });
+                                            }, TRELLO_WAIT*iterations);
+                                            iterations++;
                                         }
 
                                         // create progress bar
@@ -217,25 +222,31 @@
                                             $(progress_bar).attr("aria-valuenow", +$(progress_bar).attr("aria-valuenow") + value);
                                             $(progress_bar).attr("aria-valuemax", +$(progress_bar).attr("aria-valuemax") + maxvalue);
 
-                                            $(progress_bar).css("width", `${+$(progress_bar).attr("aria-valuenow") / +$(progress_bar).attr("aria-valuemax") * 100}%`)
+                                            let vn = +$(progress_bar).attr("aria-valuenow");
+                                            let vm = +$(progress_bar).attr("aria-valuemax");
+                                            $(progress_bar).css("width", `${vm > 0 ? (vn/vm) * 100 : 0}%`);
+                                            $(progress_bar).html(`${vn === 0 ? "&nbsp;" + vn : vn}/${vm}`);
                                         };
 
                                         // put checkboxes into progress bar
                                         for (let c = 0; c < card.idChecklists.length; c++) {
                                             let cid = card.idChecklists[c];
-                                            Trello.get(`checklists/${cid}`, function (v) {
-                                                let val = 0, mval = 0;
-                                                for (let i = 0; i < v.checkItems.length; i++) {
-                                                    let item = v.checkItems[i];
-                                                    if (item.state === "complete") {
-                                                        val++;
-                                                        mval++;
-                                                    } else {
-                                                        mval++;
+                                            setTimeout(function() {
+                                                Trello.get(`checklists/${cid}`, function (v) {
+                                                    let val = 0, mval = 0;
+                                                    for (let i = 0; i < v.checkItems.length; i++) {
+                                                        let item = v.checkItems[i];
+                                                        if (item.state === "complete") {
+                                                            val++;
+                                                            mval++;
+                                                        } else {
+                                                            mval++;
+                                                        }
                                                     }
-                                                }
-                                                progress.addCheckbox(val, mval);
-                                            });
+                                                    progress.addCheckbox(val, mval);
+                                                });
+                                            }, TRELLO_WAIT*iterations);
+                                            iterations++;
                                         }
 
                                         $(`#trello-map > .row:nth-of-type(${v_index + 2}) > .col:nth-of-type(${i + 2}) > ul`).append(li);
