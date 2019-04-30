@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Message</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
+
+    <style type="text/css">
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-button {
+            width: 0px;
+            height: 0px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border: 0px none #ffffff;
+            border-radius: 15px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+            background: var(--primary);
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #ffffff;
+            border: 0px none #ffffff;
+            border-radius: 50px;
+        }
+
+        ::-webkit-scrollbar-track:hover {
+            background: #ffffff;
+        }
+
+        ::-webkit-scrollbar-track:active {
+            background: #ffffff;
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+    </style>
+</head>
+<body class="p-3" style="overflow: hidden;height: 100vh; width: 100vw;">
+
+<div class="modal" tabindex="-1" role="dialog" id="modal-auth">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Auth</h5>
+            </div>
+            <div class="modal-body">
+                <div id="alert-auth" class="alert alert-danger d-none" role="alert"></div>
+
+                <div class="form-group">
+                    <div class="form-group">
+                        <label for="address" class="d-none"></label>
+                        <input type="text" class="form-control" id="address" placeholder="Enter address"
+                               value="ws://127.0.0.1:8880">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="name" class="d-none"></label>
+                        <input type="text" class="form-control" id="name" placeholder="Enter name">
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <div class="btn btn-primary btn-block" id="connect">Connect and Login</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("#address, #name").on("keypress", function (event) {
+        if (event.which === 13) {
+            $("#connect").click();
+        }
+    });
+
+    $("#modal-auth").modal({
+        "backdrop": "static",
+        "keyboard": false,
+        "focus": true,
+        "show": true,
+    });
+</script>
+
+<script>
+    class Server {
+        static state = 0;
+
+        static onOpen() {
+            document.server.send(JSON.stringify({
+                "type": "login",
+                "data": {
+                    "name": $("#name").val(),
+                }
+            }))
+        }
+
+        static messageHandler = {
+            "login": function (info) {
+                Server.state = 1;
+
+                $('#modal-auth').modal('hide')
+            },
+            "error": function (info) {
+                if (Server.state === 0) {
+                    $("#alert-auth")
+                        .text(info.message)
+                        .removeClass("d-none");
+                }
+            },
+            "message": function (info) {
+                console.log(info);
+                let message = null;
+
+                if (info.type === 0) {
+                    message = $(
+                        `<div class="row"><div class="col-3">${info.name}</div><div class="col-9">${info.text}</div></div>`
+                    );
+                } else if (info.type === 1) {
+                    message = $(
+                        `<div class="row"><div class="col-12">${info.name} присоединился</div></div>`
+                    );
+                } else if (info.type === 2) {
+                    message = $(
+                        `<div class="row"><div class="col-12">${info.name} отключился</div></div>`
+                    );
+                }
+
+                let container = $("#container-message");
+                container.append(message);
+                container.scrollTop(10 ** 10);
+            }
+        };
+
+        static onMessage(event) {
+            let object = JSON.parse(event.data);
+            let f = Server.messageHandler[object.type];
+            if (typeof f === "function") {
+                let data = object.data;
+
+                return f(data);
+            }
+        }
+
+        static onReadyStateChange(event) {
+            if (event.readyState === 4 && event.status === 0) {
+                $("#alert-auth")
+                    .text("Cannot connect to server")
+                    .removeClass("d-none");
+            }
+        }
+
+        static onError(event) {
+            $("#alert-auth")
+                .text("Error occurred")
+                .removeClass("d-none");
+        }
+    }
+
+    $("#connect").on("click", function () {
+        let alert = $("#alert-auth");
+        alert.addClass("d-none");
+
+        try {
+            document.server = new WebSocket($("#address").val());
+        } catch {
+            alert
+                .text("Wrong connection address")
+                .removeClass("d-none");
+
+            return;
+        }
+
+        document.server.addEventListener("readystatechange", Server.onReadyStateChange);
+        document.server.addEventListener("error", Server.onError);
+        document.server.addEventListener("message", Server.onMessage);
+        document.server.addEventListener("open", Server.onOpen);
+    });
+
+    $(function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const address = urlParams.get("address");
+        const name = urlParams.get("name");
+        if (name === null || address === null) {
+            return false;
+        }
+
+        $("#address").val(address);
+        $("#name").val(name);
+        $("#connect").click();
+    });
+</script>
+
+<!--Сюда идут сообщения-->
+<div id="container-message" class="container border rounded mb-3 p-0"
+     style="height: calc(100% - 55px); overflow-y: scroll; overflow-x: hidden">
+
+</div>
+
+<div class="container p-0">
+    <div class="row form-group">
+        <div class="col-9">
+            <label for="message" class="d-none"></label>
+            <input type="text" class="form-control" id="message" placeholder="Enter message">
+        </div>
+        <div class="col-3">
+            <div class="btn btn-primary btn-block" id="send">Send</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    $("#message").on("keypress", function (event) {
+        if (event.which === 13) {
+            $("#send").click();
+        }
+    });
+
+    $("#send").on("click", function () {
+        let message = $("#message");
+
+        document.server.send(JSON.stringify({
+            "type": "message",
+            "data": {
+                "text": message.val(),
+            }
+        }));
+
+        message.val("");
+    })
+    ;
+</script>
+
+</body>
+</html>
