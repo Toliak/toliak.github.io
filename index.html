@@ -20,7 +20,7 @@
         }
 
         #logo-purple {
-            transform: translate(-26px, 98px);
+            will-change: transform;
         }
 
         #logo > svg:last-of-type {
@@ -29,7 +29,7 @@
         }
 
         #logo > svg {
-            transition: .3s;
+            transition: .1s linear;
         }
     </style>
 </head>
@@ -155,12 +155,19 @@
 </div>
 
 <script>
-    let SCROLL_POINTS = 0;
+    let scrollPoints = 0;
+    let touchmoveData = {
+        'x': null,
+        'y': null,
+    };
     const SCROLL = [
         {
             'start': 0,
-            'end': 5,
+            'end': 10,
             'function': function (part) {
+                console.log(part);
+                part =  Math.min(1, Math.max(part, 0));
+
                 const SHIFT_BOTTOM = -26;
                 const SHIFT_RIGHT = 98;
 
@@ -176,21 +183,53 @@
     function updateScroll() {
         for (let i = 0; i < SCROLL.length; i++) {
             const obj = SCROLL[i];
-            console.table(obj);
-            if (obj.start <= SCROLL_POINTS && obj.end >= SCROLL_POINTS) {
-                obj.function((SCROLL_POINTS - obj.start) / (obj.end - obj.start))
+            if (obj.start <= scrollPoints && obj.end > scrollPoints) {
+                requestAnimationFrame(() => obj.function((scrollPoints - obj.start) / (obj.end - obj.start - 1)));
             }
         }
     }
 
-    $(window).on("mousewheel", function (event) {
-        SCROLL_POINTS += (event.originalEvent.wheelDelta > 0) ? 1 : -1;
-        if (SCROLL_POINTS < 0) {
-            SCROLL_POINTS = 0;
+    $(window).on('mousewheel', function (event) {
+        scrollPoints += (event.originalEvent.wheelDelta > 0) ? -1 : 1;
+        if (scrollPoints < 0) {
+            scrollPoints = 0;
         }
-        console.log(SCROLL_POINTS);
         updateScroll();
     });
+    $(window).on('touchmove', function (event) {
+        const STEP_Y = 50;
+        let newV = {
+            'x': event.originalEvent.changedTouches[0].screenX,
+            'y': event.originalEvent.changedTouches[0].screenY,
+        };
+
+        let update = function () {
+            touchmoveData.x = newV.x;
+            touchmoveData.y = newV.y;
+        };
+
+        if (touchmoveData.x !== null && touchmoveData.y !== null) {
+            let delta = {
+                'x': newV.x - touchmoveData.x,
+                'y': newV.y - touchmoveData.y
+            };
+
+            if (Math.abs(delta.y) >= STEP_Y) {
+                let steps = Math.abs(delta.y) / STEP_Y;
+                for (let i = 0; i < steps; i++) {
+                    scrollPoints += (delta.y > 0) ? 1 : -1;
+                    if (scrollPoints < 0) {
+                        scrollPoints = 0;
+                    }
+                    console.log(scrollPoints);
+                    updateScroll();
+                }
+                update();
+            }
+        } else {
+            update();
+        }
+    })
 </script>
 
 </body>
