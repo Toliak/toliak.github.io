@@ -240,7 +240,7 @@
             if (Math.abs(delta.y) >= STEP_Y) {
                 let steps = Math.abs(delta.y) / STEP_Y;
                 for (let i = 0; i < steps; i++) {
-                    scrollPoints += (delta.y > 0) ? 1 : -1;
+                    scrollPoints += (delta.y > 0) ? -1 : +1;
 
                     updateScroll();
                 }
