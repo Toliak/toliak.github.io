@@ -156,6 +156,7 @@
 
 <script>
     let scrollPoints = 0;
+    const SCROLL_POINTS_MAX = 10;
     let touchmoveData = {
         'x': null,
         'y': null,
@@ -163,11 +164,8 @@
     const SCROLL = [
         {
             'start': 0,
-            'end': 10,
+            'end': 3,
             'function': function (part) {
-                console.log(part);
-                part =  Math.min(1, Math.max(part, 0));
-
                 const SHIFT_BOTTOM = -26;
                 const SHIFT_RIGHT = 98;
 
@@ -176,24 +174,49 @@
                     "translate(" + SHIFT_BOTTOM * part + "px, " + SHIFT_RIGHT * part + "px)"
                 );
             },
+        },
+        {
+            'start': 3,
+            'end': 9,
+            'function': function (part) {
+                const SHIFT_BOTTOM = -160;
+                const SHIFT_BOTTOM_T = 146;
 
+                $('#logo-purple').css(
+                    "transform",
+                    "translate(" + (SHIFT_BOTTOM * part - 26) + "px, 98px)"
+                );
+                $('#logo-toliak').css(
+                    "transform",
+                    "translate(" + SHIFT_BOTTOM_T * part + "px, 0)"
+                );
+            },
         },
     ];
 
     function updateScroll() {
+        if (scrollPoints < 0) {
+            scrollPoints = 0;
+        } else if (scrollPoints > SCROLL_POINTS_MAX) {
+            scrollPoints = SCROLL_POINTS_MAX;
+        }
+
         for (let i = 0; i < SCROLL.length; i++) {
             const obj = SCROLL[i];
             if (obj.start <= scrollPoints && obj.end > scrollPoints) {
-                requestAnimationFrame(() => obj.function((scrollPoints - obj.start) / (obj.end - obj.start - 1)));
+                requestAnimationFrame(function () {
+                    let part = (scrollPoints - obj.start) / (obj.end - obj.start - 1);
+                    part = Math.min(1, Math.max(part, 0));
+
+                    obj.function(part);
+                });
             }
         }
     }
 
     $(window).on('mousewheel', function (event) {
         scrollPoints += (event.originalEvent.wheelDelta > 0) ? -1 : 1;
-        if (scrollPoints < 0) {
-            scrollPoints = 0;
-        }
+
         updateScroll();
     });
     $(window).on('touchmove', function (event) {
@@ -218,10 +241,7 @@
                 let steps = Math.abs(delta.y) / STEP_Y;
                 for (let i = 0; i < steps; i++) {
                     scrollPoints += (delta.y > 0) ? 1 : -1;
-                    if (scrollPoints < 0) {
-                        scrollPoints = 0;
-                    }
-                    console.log(scrollPoints);
+
                     updateScroll();
                 }
                 update();
