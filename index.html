@@ -249,6 +249,9 @@
         } else {
             update();
         }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
     })
 </script>
 
