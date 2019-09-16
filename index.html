@@ -12,28 +12,59 @@
         }
 
         #logo-container {
+            position: relative;
             display: flex;
             justify-content: center;
+            align-items: center;
+            min-height: 500px;
         }
 
         #logo {
-            width: 512px;
-            height: 512px;
-            transform: scale(2);
-        }
-
-        #logo-purple {
-            will-change: transform;
-        }
-
-        #logo > svg:last-of-type {
-            margin-left: -512px;
-            position: absolute;
+            position: relative;
+            width: 640px;
+            height: 650px;
         }
 
         #logo > svg {
-            transition: .1s linear;
+            overflow: visible;
         }
+
+        #logo > svg * {
+            overflow: visible;
+            transition: .4s ease-in-out;
+            will-change: transform;
+        }
+
+        #logo-toliak-pure:hover {
+            transform: translate(1px, -2px);
+        }
+
+        #logo-purple-pure:hover {
+            transform: translate(-1px, 2px);
+        }
+
+        #logo-toliak-pure.active {
+            transform: translate(20px, -73px);
+        }
+
+        #logo-purple-pure.active {
+            transform: translate(-20px, 73px);
+        }
+
+        #logo-layer {
+            filter: url(#dropshadow);
+            cursor: pointer;
+        }
+
+        #logo-click-tip {
+            transition: all .4s linear;
+            transform: scale(0.6);
+            bottom: 231px;
+            left: 0;
+            position: absolute;
+            will-change: opacity;
+        }
+
     </style>
 </head>
 <body>
@@ -42,29 +73,49 @@
     <div id="logo">
         <svg
                 xmlns="http://www.w3.org/2000/svg"
-                id="logo-purple"
+                id="logo-svg"
                 version="1.1"
-                viewBox="0 0 135.46667 135.46666"
-                height="512"
-                width="512">
-            <defs
-                    id="defs2"/>
+                viewBox="0 0 169.33334 171.97916"
+                height="650"
+                width="640">
+            <defs id="defs2"/>
+            <metadata id="metadata5"></metadata>
+            <filter id="dropshadow" height="150%">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="1"/> <!-- stdDeviation is how much to blur -->
+                <feOffset dx="0" dy="0" result="offsetblur"/> <!-- how much to offset -->
+                <feComponentTransfer>
+                    <feFuncA type="linear" slope="0.7"/> <!-- slope is the opacity of the shadow -->
+                </feComponentTransfer>
+                <feMerge>
+                    <feMergeNode/> <!-- this contains the offset blurred image -->
+                    <feMergeNode in="SourceGraphic"/> <!-- this contains the element that the filter is applied to -->
+                </feMerge>
+            </filter>
+            <g id="logo-border" style="display: none;">
+                <path
+                        id="path853"
+                        d="M 108.52643,0.62677968 82.17392,98.956348"
+                        style="fill:none;stroke:#ffffff;stroke-width:0.13229167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"/>
+                <path
+                        id="path855"
+                        d="M 62.765579,171.37001 89.118084,73.04043"
+                        style="fill:none;stroke:#ffffff;stroke-width:0.13229167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"/>
+            </g>
             <g
-                    transform="translate(0,-161.53335)"
+                    transform="translate(0,-121.58127)"
                     style="display:inline"
-                    id="layer1">
-                <g
-                        transform="matrix(0.82336778,0,0,0.82336778,15.323457,171.37356)"
-                        id="g4544">
+                    id="logo-layer">
+                <g id="logo-purple-pure">
                     <rect
-                            style="fill:#4d4d4d;fill-opacity:1;stroke-width:0.28303397"
-                            id="rect4535"
-                            width="77.339348"
-                            height="32.585854"
-                            x="82.185738"
-                            y="53.409859"
-                            transform="matrix(1,0,-0.25881905,0.96592583,0,0)"/>
+                            y="201.48721"
+                            x="141.26682"
+                            height="26.830143"
+                            width="64.554222"
+                            id="rect5119"
+                            style="fill:#4d4d4d;fill-opacity:1;stroke-width:0.11186879"
+                            transform="matrix(1,0,-0.25881905,0.96592582,0,0)"/>
                     <g
+                            transform="matrix(0.82336778,0,0,0.82336778,32.830801,152.14418)"
                             id="text4539"
                             style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
                             aria-label="Purple">
@@ -94,190 +145,66 @@
                                 d="m 132.20947,69.490421 h -7.20231 q 0,2.167466 1.016,3.070577 1.03858,0.903111 2.59644,0.903111 0.79023,0 1.10632,-0.06773 0.31608,-0.09031 0.58702,-0.158044 0.29351,-0.09031 0.4064,-0.135467 0.56444,-0.158044 0.97084,-0.293511 l 0.27094,1.309511 q -2.25778,0.790222 -3.52214,0.790222 -2.32551,0 -3.72533,-1.399822 -1.39982,-1.4224 -1.39982,-4.244622 0,-2.8448 1.30951,-4.425245 1.33209,-1.580444 3.34151,-1.580444 2.032,0 3.16089,1.309511 1.12889,1.309511 1.12889,3.544711 0,0.6096 -0.0452,1.377245 z m -7.08942,-1.286934 h 5.50898 q 0,-1.670755 -0.58703,-2.573866 -0.58702,-0.903112 -2.05457,-0.903112 -1.44498,0 -2.12231,0.970845 -0.67734,0.970844 -0.74507,2.506133 z"/>
                     </g>
                 </g>
-
-            </g>
-        </svg>
-        <svg
-                xmlns="http://www.w3.org/2000/svg"
-                id="logo-toliak"
-                version="1.1"
-                viewBox="0 0 135.46667 135.46666"
-                height="512"
-                width="512">
-            <defs
-                    id="defs3"/>
-            <g
-                    transform="translate(0,-161.53335)"
-                    style="display:inline"
-                    id="layer2">
-                <g
-                        transform="matrix(0.82336778,0,0,0.82336778,24.886753,171.37356)"
-                        id="g4533">
-                    <rect
-                            transform="matrix(1,0,-0.25881905,0.96592583,0,0)"
-                            style="fill:#78598f;fill-opacity:1;stroke-width:0.13586734"
-                            id="rect3750"
-                            width="78.402657"
-                            height="32.585854"
-                            x="-7.8317719"
-                            y="53.409859"/>
+                <g id="logo-toliak-pure">
                     <g
-                            id="text4559"
-                            style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-                            aria-label="Toliak">
-                        <path
-                                id="path883"
-                                style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:Gudea;-inkscape-font-specification:Gudea;fill:#ffffff;stroke-width:0.26458332"
-                                d="M -9.675284,74.75 V 60.458267 h -4.425244 v -1.512712 h 10.4760885 v 1.512712 H -8.0045284 V 74.75 Z"/>
-                        <path
-                                id="path885"
-                                style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:Gudea;-inkscape-font-specification:Gudea;fill:#ffffff;stroke-width:0.26458332"
-                                d="m 4.390653,69.195867 q 0,-2.190045 -0.8579555,-3.341511 -0.8579556,-1.151467 -2.5061334,-1.151467 -1.64817775,0 -2.3480889,1.106311 -0.6773333,1.083733 -0.6773333,3.341511 0,4.2672 3.1383111,4.2672 1.6481778,0 2.4384,-1.016 0.8128,-1.038578 0.8128,-3.206044 z m 0.4064,4.154311 q -1.2869333,1.535289 -3.6350222,1.535289 -2.3480889,0 -3.6124445,-1.512711 -1.2417777,-1.535289 -1.2417777,-4.2672 0,-2.754489 1.1966222,-4.312356 1.2192,-1.557867 3.5447111,-1.557867 2.3480889,0 3.6801778,1.580445 1.3546667,1.580444 1.3546667,4.289778 0,2.709333 -1.2869334,4.244622 z"/>
-                        <path
-                                id="path887"
-                                style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:Gudea;-inkscape-font-specification:Gudea;fill:#ffffff;stroke-width:0.26458332"
-                                d="M 9.1094007,74.75 V 58.945555 H 10.802734 V 74.75 Z"/>
-                        <path
-                                id="path889"
-                                style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:Gudea;-inkscape-font-specification:Gudea;fill:#ffffff;stroke-width:0.26458332"
-                                d="M 14.5958,74.75 V 63.461111 h 1.693333 V 74.75 Z m 1.693333,-15.804445 v 2.009423 H 14.5958 v -2.009423 z"/>
-                        <path
-                                id="path891"
-                                style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:Gudea;-inkscape-font-specification:Gudea;fill:#ffffff;stroke-width:0.26458332"
-                                d="m 24.936392,67.999244 h 0.925689 q 0,-2.054577 -0.519289,-2.664177 -0.519289,-0.632178 -2.302933,-0.632178 -1.783645,0 -3.025422,0.474133 l -0.316089,-1.309511 q 1.896533,-0.632178 3.928533,-0.632178 3.973689,0 3.973689,3.973689 V 74.75 h -0.993422 l -0.587022,-1.332089 q -1.038578,0.857956 -1.806223,1.174045 -0.745066,0.293511 -1.738489,0.293511 -1.580444,0 -2.460977,-0.925689 -0.880534,-0.948267 -0.880534,-2.483556 0,-3.476978 5.802489,-3.476978 z m 0.948267,1.4224 h -1.016 q -2.302933,0 -3.183467,0.451556 -0.857955,0.451556 -0.857955,1.4224 0,0.948267 0.496711,1.557867 0.496711,0.6096 1.286933,0.6096 0.8128,0 1.535289,-0.361245 0.745067,-0.383822 1.738489,-1.309511 z"/>
-                        <path
-                                id="path893"
-                                style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:Gudea;-inkscape-font-specification:Gudea;fill:#ffffff;stroke-width:0.26458332"
-                                d="m 31.709701,58.945555 h 1.693333 V 68.2476 l 4.831644,-4.786489 h 2.144889 L 35.593078,68.0444 40.627923,74.75 h -1.919111 l -4.109156,-5.644444 -1.196622,1.2192 V 74.75 h -1.693333 z"/>
+                            transform="matrix(0.82336778,0,0,0.82336778,42.394097,152.14418)"
+                            id="g4533">
+                        <rect
+                                transform="matrix(1,0,-0.25881905,0.96592583,0,0)"
+                                style="fill:#78598f;fill-opacity:1;stroke-width:0.13586734"
+                                id="rect3750"
+                                width="78.402657"
+                                height="32.585854"
+                                x="-7.8317719"
+                                y="53.409859"/>
+                        <g
+                                id="text4559"
+                                style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+                                aria-label="Toliak">
+                            <path
+                                    id="path883"
+                                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:Gudea;-inkscape-font-specification:Gudea;fill:#ffffff;stroke-width:0.26458332"
+                                    d="M -9.675284,74.75 V 60.458267 h -4.425244 v -1.512712 h 10.4760885 v 1.512712 H -8.0045284 V 74.75 Z"/>
+                            <path
+                                    id="path885"
+                                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:Gudea;-inkscape-font-specification:Gudea;fill:#ffffff;stroke-width:0.26458332"
+                                    d="m 4.390653,69.195867 q 0,-2.190045 -0.8579555,-3.341511 -0.8579556,-1.151467 -2.5061334,-1.151467 -1.64817775,0 -2.3480889,1.106311 -0.6773333,1.083733 -0.6773333,3.341511 0,4.2672 3.1383111,4.2672 1.6481778,0 2.4384,-1.016 0.8128,-1.038578 0.8128,-3.206044 z m 0.4064,4.154311 q -1.2869333,1.535289 -3.6350222,1.535289 -2.3480889,0 -3.6124445,-1.512711 -1.2417777,-1.535289 -1.2417777,-4.2672 0,-2.754489 1.1966222,-4.312356 1.2192,-1.557867 3.5447111,-1.557867 2.3480889,0 3.6801778,1.580445 1.3546667,1.580444 1.3546667,4.289778 0,2.709333 -1.2869334,4.244622 z"/>
+                            <path
+                                    id="path887"
+                                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:Gudea;-inkscape-font-specification:Gudea;fill:#ffffff;stroke-width:0.26458332"
+                                    d="M 9.1094007,74.75 V 58.945555 H 10.802734 V 74.75 Z"/>
+                            <path
+                                    id="path889"
+                                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:Gudea;-inkscape-font-specification:Gudea;fill:#ffffff;stroke-width:0.26458332"
+                                    d="M 14.5958,74.75 V 63.461111 h 1.693333 V 74.75 Z m 1.693333,-15.804445 v 2.009423 H 14.5958 v -2.009423 z"/>
+                            <path
+                                    id="path891"
+                                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:Gudea;-inkscape-font-specification:Gudea;fill:#ffffff;stroke-width:0.26458332"
+                                    d="m 24.936392,67.999244 h 0.925689 q 0,-2.054577 -0.519289,-2.664177 -0.519289,-0.632178 -2.302933,-0.632178 -1.783645,0 -3.025422,0.474133 l -0.316089,-1.309511 q 1.896533,-0.632178 3.928533,-0.632178 3.973689,0 3.973689,3.973689 V 74.75 h -0.993422 l -0.587022,-1.332089 q -1.038578,0.857956 -1.806223,1.174045 -0.745066,0.293511 -1.738489,0.293511 -1.580444,0 -2.460977,-0.925689 -0.880534,-0.948267 -0.880534,-2.483556 0,-3.476978 5.802489,-3.476978 z m 0.948267,1.4224 h -1.016 q -2.302933,0 -3.183467,0.451556 -0.857955,0.451556 -0.857955,1.4224 0,0.948267 0.496711,1.557867 0.496711,0.6096 1.286933,0.6096 0.8128,0 1.535289,-0.361245 0.745067,-0.383822 1.738489,-1.309511 z"/>
+                            <path
+                                    id="path893"
+                                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:Gudea;-inkscape-font-specification:Gudea;fill:#ffffff;stroke-width:0.26458332"
+                                    d="m 31.709701,58.945555 h 1.693333 V 68.2476 l 4.831644,-4.786489 h 2.144889 L 35.593078,68.0444 40.627923,74.75 h -1.919111 l -4.109156,-5.644444 -1.196622,1.2192 V 74.75 h -1.693333 z"/>
+                        </g>
                     </g>
                 </g>
-
             </g>
+
+
         </svg>
+        <img id="logo-click-tip" src="img/click.svg" alt="">
     </div>
 </div>
 
 <script>
-    let scrollPoints = 0;
-    const SCROLL_POINTS_MAX = 18;
-    let touchmoveData = {
-        'x': null,
-        'y': null,
-    };
-    const SCROLL = [
-        {
-            'start': 0,
-            'end': 3,
-            'function': function (part) {
-                const SHIFT_BOTTOM = -26;
-                const SHIFT_RIGHT = 98;
-
-                $('#logo-purple').css(
-                    "transform",
-                    "translate(" + SHIFT_BOTTOM * part + "px, " + SHIFT_RIGHT * part + "px)"
-                );
-            },
-        },
-        {
-            'start': 2,
-            'end': 15,
-            'function': function (part) {
-                const SHIFT_BOTTOM = -160;
-                const SHIFT_BOTTOM_T = 146;
-
-                $('#logo-purple').css(
-                    "transform",
-                    "translate(" + (SHIFT_BOTTOM * part - 26) + "px, 98px)"
-                );
-                $('#logo-toliak').css(
-                    "transform",
-                    "translate(" + SHIFT_BOTTOM_T * part + "px, 0)"
-                );
-            },
-        },
-        {
-            'start': 14,
-            'end': 18,
-            'function': function (part) {
-                const SHIFT_BOTTOM = 186 + 83;
-                const SHIFT_TOP = 98 - 79;
-                const ROTATE = 180;
-
-                $('#logo-purple').css(
-                    "transform",
-                    "translate(" + (SHIFT_BOTTOM * part - 186) + "px, " + (98 - SHIFT_TOP * part) + "px) rotateZ(" + ROTATE * part + "deg)"
-                );
-            },
-        },
-    ];
-
-    function updateScroll() {
-        if (scrollPoints < 0) {
-            scrollPoints = 0;
-        } else if (scrollPoints > SCROLL_POINTS_MAX) {
-            scrollPoints = SCROLL_POINTS_MAX;
-        }
-
-        for (let i = 0; i < SCROLL.length; i++) {
-            const obj = SCROLL[i];
-            if (obj.start <= scrollPoints && obj.end > scrollPoints) {
-                requestAnimationFrame(function () {
-                    let part = (scrollPoints - obj.start) / (obj.end - obj.start - 1);
-                    part = Math.min(1, Math.max(part, 0));
-
-                    obj.function(part);
-                });
-            }
-        }
-    }
-
-    $(window).on('mousewheel', function (event) {
-        scrollPoints += (event.originalEvent.wheelDelta > 0) ? -1 : 1;
-
-        updateScroll();
-    });
-
-    $(window).on('touchmove', function (event) {
-        const STEP_Y = 50;
-        let newV = {
-            'x': event.originalEvent.changedTouches[0].screenX,
-            'y': event.originalEvent.changedTouches[0].screenY,
-        };
-
-        let update = function () {
-            touchmoveData.x = newV.x;
-            touchmoveData.y = newV.y;
-        };
-
-        if (touchmoveData.x !== null && touchmoveData.y !== null) {
-            let delta = {
-                'x': newV.x - touchmoveData.x,
-                'y': newV.y - touchmoveData.y
-            };
-
-            if (Math.abs(delta.y) >= STEP_Y) {
-                let steps = Math.abs(delta.y) / STEP_Y;
-                for (let i = 0; i < steps; i++) {
-                    scrollPoints += (delta.y > 0) ? -1 : +1;
-
-                    updateScroll();
-                }
-                update();
-            }
-        } else {
-            update();
-        }
-
-        event.preventDefault();
-        event.stopImmediatePropagation();
-    });
-
-    $(window).on('touchstart', function (event) {
-        touchmoveData = {
-            'x': null,
-            'y': null,
-        };
-    });
+    $('#logo-purple-pure, #logo-toliak-pure')
+        .on('click', function () {
+            $(this).toggleClass('active');
+            $('#logo-click-tip').css('opacity', '0');
+        })
+        .on('mouseover', function () {
+            $('#logo-click-tip').css('opacity', '0');
+        });
 </script>
 
 </body>
