@@ -8,8 +8,6 @@
     <style>
         body {
             background-color: #333333;
-            overscroll-behavior-y: none;
-            overflow: hidden;
         }
 
         #logo-container {
@@ -39,11 +37,11 @@
             will-change: transform;
         }
 
-        #logo-toliak-pure:hover {
+        #logo-toliak-pure:hover:not(.hover-disable):not(.active) {
             transform: translate(1px, -2px);
         }
 
-        #logo-purple-pure:hover {
+        #logo-purple-pure:hover:not(.hover-disable):not(.active) {
             transform: translate(-1px, 2px);
         }
 
@@ -77,7 +75,20 @@
         }
 
         #links {
+            width: 640px;
+            height: 650px;
             position: relative;
+        }
+
+        #links-toliak {
+            left: -33px;
+            top: 100px;
+            text-align: end;
+        }
+
+        #links-purple {
+            bottom: 100px;
+            right: -33px;
         }
 
         #links-toliak, #links-purple {
@@ -86,6 +97,7 @@
             transition: .2s linear;
             transition-delay: 0s;
             z-index: 0;
+            width: 400px;
         }
 
         #links-toliak.active, #links-purple.active {
@@ -96,6 +108,9 @@
         }
 
         #links a {
+            height: 45px;
+            transition: .2s linear;
+            display: block;
             text-decoration: none;
             font-size: 30px;
             font-family: 'Shadows Into Light Two', cursive;
@@ -237,23 +252,57 @@
     <div id="links">
         <div id="links-toliak">
             <a href="#">Link 1</a>
+            <a href="#">Link 2</a>
+            <a href="#">Link 3</a>
+            <a href="#">Link 4</a>
+            <a href="#">Link 5</a>
+            <a href="#">Link 6</a>
         </div>
         <div id="links-purple">
-            <a href="#">Link 2</a>
+            <a href="#">Link -1</a>
+            <a href="#">Link -2</a>
+            <a href="#">Link -3</a>
+            <a href="#">Link -4</a>
+            <a href="#">Link -5</a>
+            <a href="#">Link -6</a>
         </div>
     </div>
 </div>
 
 <script>
+    let disableHoverTimeout;
+
+    function disableHover(element) {
+        clearTimeout(disableHoverTimeout);
+        $(element).addClass('hover-disable');
+        disableHoverTimeout = setTimeout(() => $(element).removeClass('hover-disable'), 1000);
+    }
+
     $('#logo-purple-pure, #logo-toliak-pure')
         .on('click', function () {
             $(this).toggleClass('active');
             $($(this).data('toggle-links')).toggleClass('active');
             $('#logo-click-tip').css('opacity', '0');
+            disableHover(this);
         })
         .on('mouseover', function () {
             $('#logo-click-tip').css('opacity', '0');
         });
+
+    let children = $('#links-toliak').children();
+    const MARGIN_STEP = 14;
+    for (let i = 1; i < children.length; i++) {
+        let obj = $(children[i]);
+        obj.css('margin-right', MARGIN_STEP * i + 'px');
+    }
+
+    children = $('#links-purple').children();
+
+    for (let i = 1; i < children.length; i++) {
+        let j = children.length - i - 1;
+        let obj = $(children[j]);
+        obj.css('margin-left', MARGIN_STEP * i + 'px');
+    }
 </script>
 
 </body>
