@@ -20,7 +20,8 @@
         }
 
         #logo {
-            position: relative;
+            position: absolute;
+            top: 0;
             width: 640px;
             height: 650px;
         }
@@ -53,6 +54,9 @@
 
         #logo-layer {
             filter: url(#dropshadow);
+        }
+
+        #logo-layer > * {
             cursor: pointer;
         }
 
@@ -101,10 +105,9 @@
                         d="M 62.765579,171.37001 89.118084,73.04043"
                         style="fill:none;stroke:#ffffff;stroke-width:0.13229167;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"/>
             </g>
-            <g
-                    transform="translate(0,-121.58127)"
-                    style="display:inline"
-                    id="logo-layer">
+            <g id="logo-layer"
+               transform="translate(0,-121.58127)"
+               style="display:inline">
                 <g id="logo-purple-pure">
                     <rect
                             y="201.48721"
@@ -194,6 +197,9 @@
         </svg>
         <img id="logo-click-tip" src="img/click.svg" alt="">
     </div>
+    <!--<div id="links">
+        <a href="#">link</a>
+    </div>-->
 </div>
 
 <script>
