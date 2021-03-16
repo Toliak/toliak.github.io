@@ -1,0 +1,23 @@
+image: debian:buster
+
+devops:
+  only:
+    refs:
+      - master
+      - develop
+
+  before_script:
+    - apt-get update -y
+    - apt-get install -y sshpass openssh-client
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - echo -e "Host ToliakRuVM\n\tHostname 127.0.0.1\n\tUser root" >> ~/.ssh/config
+    - echo -e "\tIdentityFile ~/.ssh/ToliakRuVM\n\tIdentitiesOnly no\n\n" >> ~/.ssh/config
+    
+  script:
+    - if [ ${CI_COMMIT_REF_SLUG} = develop ]; then SUB_SCRIPT="_dev"; fi
+    - echo $SUB_SCRIPT
+    - sshpass -p $CI_PASSWORD_VISITOR scp visitor@skeak.toliak.ru:~/.ssh/ToliakRuVM ~/.ssh/ToliakRuVM
+    - sshpass -p $CI_PASSWORD_VISITOR ssh -L 127.0.0.1:8022:ToliakRuVM:22 visitor@skeak.toliak.ru -f 'sleep 1000'
+    - ssh -p 8022 ToliakRuVM ./update_course_project_presentation$SUB_SCRIPT.sh ${CI_COMMIT_REF_SLUG}
