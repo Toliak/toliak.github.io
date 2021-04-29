@@ -1,0 +1,742 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Course Project by Toliak</title>
+
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/monokai.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+
+    <link rel="stylesheet" href="static/css/FiraSans.css">
+    <style>
+        section h1, h2, h3, p, a {
+            font-family: 'Fira Sans', sans-serif !important;
+        }
+
+        [data-panel="Themes"], [data-panel="Transitions"] {
+            display: none !important;
+        }
+
+        .core-tree p {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            font-size: 90%;
+            text-align: left;
+        }
+
+        .links p {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            font-size: 60%;
+        }
+
+        section p {
+            text-align: left;
+        }
+
+        section ul {
+            display: block !important;
+        }
+    </style>
+</head>
+<body>
+<div class="reveal">
+    <div class="slides">
+        <section>
+            <h2>Курсовой проект</h2>
+            <p class="fragment" style="text-align: center">Подсчет частиц на изображениях электронных микроскопов</p>
+            <p style="font-weight: bold; font-size: 70%">
+                Выполнил: Титов А. С.<br>
+                Руководитель: Байдин Г. С.<br>
+                Группа: ИУ8-33<br>
+                Год: 2019
+            </p>
+            <p style="text-align: right; font-size: 70%; margin-top: 80px">
+                <a href="https://toliak.ru/" target="_blank">toliak.ru</a>
+            </p>
+        </section>
+        <section>
+            <section>
+                <h2>Введение</h2>
+            </section>
+            <section>
+                <h2>Предметная область</h2>
+                <ul>
+                    <li>Обработка изображений</li>
+                    <li>Линейная алгебра</li>
+                    <li>Обучение без учителя</li>
+                </ul>
+            </section>
+            <section>
+                <h2>Актуальность</h2>
+                <ul>
+                    <li>Обработка данных</li>
+                    <li>Научные исследования</li>
+                </ul>
+            </section>
+        </section>
+        <section>
+            <h2>Цели и задачи</h2>
+            <p class="fragment">Подсчет частиц и сегментация изображения. Анализ теоретического материала и реализация
+                прототипов</p>
+            <p class="fragment">Подготовка и обработка выборки изображений</p>
+        </section>
+        <section>
+            <h2>Теоретическая часть</h2>
+            <ul style="font-size: 75%" class="fragment">
+                <li>Общие алгоритмы</li>
+                <li>Алгоритм пороговой сегментации</li>
+                <li>Алгоритм водоразделов</li>
+                <li>Нейронная сеть U-Net</li>
+                <li>Алгоритм спектральной кластеризации</li>
+            </ul>
+        </section>
+        <section>
+            <section>
+                <h2>Общие алгоритмы</h2>
+                <div class="fragment">
+                    <h3>Медианный фильтр</h3>
+                    <img src="static/img/MedianFilter.png" alt="" style="max-width: 30%">
+                </div>
+            </section>
+            <section>
+                <h3>Фильтр Гаусса</h3>
+                <div>
+                    \[
+                    \frac{1}{2 \pi \sigma^2}e^{- \frac{x^2+y^2}{2 \sigma^2}}
+                    \]
+                </div>
+            </section>
+            <section>
+                <h3>Маркировка бинарной матрицы</h3>
+                <div>
+                    \begin{equation}
+                    \begin{split}
+                    \begin{bmatrix}
+                    0 & 1 & 0 & 1 & 1 \\
+                    1 & 0 & 1 & 0 & 1 \\
+                    0 & 1 & 0 & 0 & 0 \\
+                    0 & 1 & 0 & 1 & 1 \\
+                    1 & 1 & 0 & 1 & 1
+                    \end{bmatrix}
+                    \end{split}
+                    \rightarrow
+                    \begin{split}
+                    \begin{bmatrix}
+                    0 & 1 & 0 & 2 & 2 \\
+                    3 & 0 & 4 & 0 & 2 \\
+                    0 & 5 & 0 & 0 & 0 \\
+                    0 & 5 & 0 & 6 & 6 \\
+                    5 & 5 & 0 & 6 & 6
+                    \end{bmatrix}
+                    \end{split}
+                    \nonumber
+                    \end{equation}
+                </div>
+            </section>
+        </section>
+        <section>
+            <section>
+                <h2>Алгоритм пороговой сегментации</h2>
+                <p>Подзадача: определение порогового значения</p>
+                <div class="fragment">
+                    <p>Способы определения:</p>
+                    <ul style="font-size: 75%">
+                        <li>ISODATA (ИСОМАД)</li>
+                        <li>Mean (Среднее)</li>
+                        <li>Triangle (Метод треугольника)</li>
+                        <li>Otsu (Оцу)</li>
+                    </ul>
+                </div>
+            </section>
+            <section>
+                <h3>ISODATA</h3>
+                <div>
+                    \[
+                    t = \frac{\frac{1}{N_T - 1} \cdot \sum_{i=1}^{N_T-1} x_i
+                    + \frac{1}{N - N_T} \cdot \sum_{i=N_T+1}^{N} x_i}
+                    {2}
+                    \]
+                </div>
+            </section>
+            <section>
+                <h3>Среднее</h3>
+                <div>
+                    \[
+                    T = \frac{ \sum_{i=1}^{M} \sum_{j=1}^{N} a_{ij} } {M \cdot N}
+                    \]
+                </div>
+            </section>
+            <section>
+                <h3>Triangle</h3>
+                <img src="static/img/Triangle.png" alt="" style="max-width: 50%">
+            </section>
+            <section>
+                <h3>Otsu</h3>
+                <div>
+                    \begin{equation}
+                    \begin{split}\omega _{0}(t)&=\sum _{i=0}^{t-1}p(i)\\[4pt]
+                    \omega _{1}(t)&=\sum _{i=t}^{L-1}p(i)\end{split}
+                    \hspace{0.5cm}
+                    \begin{split}\mu _{0}(t)&={\frac {\sum _{i=0}^{t-1}ip(i)}{
+                    \omega _{0}(t)}}\\[4pt]\mu _{1}(t)&={\frac {\sum _{i=t}^{L-1}ip(i)}{\omega _{1}(t)}}
+                    \end{split}
+                    \end{equation}
+                    \begin{equation}
+                    \sigma _{w}^{2}(t)=\omega _{0}(t)\sigma _{0}^{2}(t)+\omega _{1}(t)\sigma _{1}^{2}(t)
+                    \end{equation}
+                </div>
+            </section>
+        </section>
+        <section>
+            <h2>Алгоритм водоразделов</h2>
+            <p class="fragment">Построение карты расстояний</p>
+            <p class="fragment">Нахождение локальных минимумов</p>
+            <p class="fragment">Примение водораздела</p>
+        </section>
+        <section>
+            <h2>Нейронная сеть U-Net</h2>
+            <img src="static/img/UNet.png" alt="" style="max-width: 60%">
+        </section>
+        <section>
+            <h2>Спектральная кластеризация</h2>
+            <p class="fragment">Подготовка графа, нормирование весов</p>
+            <div class="fragment">
+                <p>Применение спектральной кластеризации</p>
+                <p>Примечание: необходимо задать количество кластеров</p>
+            </div>
+        </section>
+        <section>
+            <h3>Программная реализация</h3>
+            <div class="fragment">
+                <p>Python 3.7, pipenv</p>
+                <p style="margin-bottom: 5px">Существующий инструментарий:</p>
+                <ul style="font-size: 50%">
+                    <li>numpy</li>
+                    <li>matplotlib</li>
+                    <li>imageio</li>
+                    <li>sklearn</li>
+                    <li>scikit-image</li>
+                    <li>pyamg</li>
+                </ul>
+            </div>
+        </section>
+        <section>
+            <section class="core-tree">
+                <h3>Модуль алгоритмов</h3>
+                <p>Модуль core</p>
+                <p class="fragment">
+                    <a style="display: inline-block; width: 80px;">&nbsp;</a>
+                    Подмодуль Algorithm
+                </p>
+                <p class="fragment">
+                    <a style="display: inline-block; width: 160px;">&nbsp;</a>
+                    Algorithm
+                </p>
+                <p class="fragment">
+                    <a style="display: inline-block; width: 160px;">&nbsp;</a>
+                    Threshold : Algorithm
+                </p>
+                <p class="fragment">
+                    <a style="display: inline-block; width: 160px;">&nbsp;</a>
+                    Watershed : Algorithm
+                </p>
+                <p class="fragment">
+                    <a style="display: inline-block; width: 80px;">&nbsp;</a>
+                    Подмодуль AlgorithmList
+                </p>
+                <p class="fragment">
+                    <a style="display: inline-block; width: 160px;">&nbsp;</a>
+                    AlgorithmList
+                </p>
+                <p class="fragment">
+                    <a style="display: inline-block; width: 160px;">&nbsp;</a>
+                    SpectralClustering : AlgorithmList
+                </p>
+            </section>
+            <section class="core-tree">
+                <p>Модуль core</p>
+                <p class="fragment">
+                    <a style="display: inline-block; width: 80px;">&nbsp;</a>
+                    Подмодуль Dataset
+                </p>
+                <p class="fragment">
+                    <a style="display: inline-block; width: 80px;">&nbsp;</a>
+                    Подмодуль Utils
+                </p>
+            </section>
+        </section>
+        <section>
+            <section class="core-tree">
+                <h3>Демонстрационный модуль</h3>
+                <p>Модуль demo</p>
+                <p class="fragment">
+                    <a style="display: inline-block; width: 80px;">&nbsp;</a>
+                    Подмодуль threshold
+                </p>
+                <p class="fragment">
+                    <a style="display: inline-block; width: 80px;">&nbsp;</a>
+                    Подмодуль watershed
+                </p>
+                <p class="fragment">
+                    <a style="display: inline-block; width: 80px;">&nbsp;</a>
+                    Подмодуль spectral_clustering
+                </p>
+            </section>
+            <section class="core-tree">
+                <p>Модуль demo.config</p>
+                <div class="fragment">
+                    <p>
+                        <a style="display: inline-block; width: 80px;">&nbsp;</a>
+                        Подмодуль config_threshold
+                    </p>
+                    <p>
+                        <a style="display: inline-block; width: 80px;">&nbsp;</a>
+                        Подмодуль config_watershed
+                    </p>
+                    <p>
+                        <a style="display: inline-block; width: 80px;">&nbsp;</a>
+                        Подмодуль config_spectral_clustering
+                    </p>
+                </div>
+            </section>
+        </section>
+        <section>
+            <h3>Технологии и методы программирования</h3>
+            <div class="fragment">
+                <ul>
+                    <li>Тестирование модуля алгоритмов и демонстрационного модуля</li>
+                    <li>Документация при помощи Doxygen</li>
+                    <li>Docker образ</li>
+                    <li>CI/CD: Gitlab, Travis</li>
+                    <li>Интерпретируемые файлы на языке bash</li>
+                </ul>
+            </div>
+        </section>
+        <section>
+            <h3>Тестирование</h3>
+            <p>Модуль tests</p>
+            <div class="fragment">
+                    <pre style="font-size: 35%;"><code class="hljs" data-trim data-line-numbers="10,12">
+----------- coverage: platform linux, python 3.7.5-final-0 -----------
+Name                                 Stmts   Miss  Cover
+--------------------------------------------------------
+/opt/builder/core/Algorithm.py          39      0   100%
+/opt/builder/core/AlgorithmList.py      61      0   100%
+/opt/builder/core/Dataset.py            13      0   100%
+/opt/builder/core/Utils.py              25      0   100%
+/opt/builder/core/__init__.py            0      0   100%
+--------------------------------------------------------
+TOTAL                                  138      0   100%
+
+================== 42 passed, 6 warnings in 165.85s (0:02:45) ==================
+                    </code></pre>
+                <p style="text-align: right; font-size: 50%;">
+                    <a href="https://gitlab.toliak.ru/Toliak/particle-counter/-/jobs/652" target="_blank">
+                        Job с тестами
+                    </a>
+                </p>
+            </div>
+        </section>
+        <section>
+            <h3>Документация</h3>
+            <p>Python + Doxygen = ?</p>
+            <div class="fragment">
+                <img src="static/img/Doxygen.png" alt="" style="max-width: 50%">
+                <p style="text-align: right; font-size: 50%;">
+                    <a href="https://toliak.ru/course-project/docs/latest" target="_blank">
+                        Документация
+                    </a>
+                </p>
+                <p style="text-align: right; font-size: 50%;">
+                    <a href="https://hub.docker.com/r/toliak/doxygen-doxypypy" target="_blank">
+                        DockerHub: toliak/doxygen-doxypypy
+                    </a>
+                </p>
+            </div>
+        </section>
+        <section>
+            <section>
+                <h3>Docker образ</h3>
+                <div class="fragment">
+                    <img src="static/img/DockerMeme.png" alt="" style="max-width: 50%">
+                    <p style="text-align: right; font-size: 50%;">
+                        <a href="https://gitlab.toliak.ru/Toliak/particle-counter/blob/master/Dockerfile"
+                           target="_blank">
+                            Dockerfile
+                        </a>
+                    </p>
+                    <p style="text-align: right; font-size: 50%;">
+                        <a href="https://hub.docker.com/r/toliak/course-project-2019" target="_blank">
+                            Docker образ
+                        </a>
+                    </p>
+                </div>
+            </section>
+            <section>
+                <p>Запуск docker контейнера</p>
+                <pre style="font-size: 50%;"><code class="hljs bash">
+APP_NAME=threshold|watershed|spectral_clustering
+TAG_NAME=latest|dev
+docker run -it --rm \
+	   -v $(pwd):/opt/builder/ \
+	   -w /opt/builder/demo \
+       toliak/course-project-2019:$TAG_NAME \
+       python $APP_NAME.py
+                </code></pre>
+            </section>
+            <section>
+                <p>Запуск docker контейнера с помощью скрипта</p>
+                <pre style="font-size: 50%;"><code class="hljs bash">
+APP_NAME=threshold|watershed|spectral_clustering
+TAG_NAME=latest|dev
+./scripts/docker.sh $TAG_NAME python $APP_NAME.py
+                </code></pre>
+            </section>
+        </section>
+        <section>
+            <section>
+                <h3>CI/CD Gitlab</h3>
+                <div class="fragment">
+                    <div style="float: left">
+                        <p style="margin-bottom: 5px">Этапы:</p>
+                        <ul style="font-size: 50%">
+                            <li>Сборка</li>
+                            <li>Тестирование</li>
+                            <li>Доставка</li>
+                        </ul>
+                    </div>
+                    <img src="static/img/Pipeline.png" alt="" style="max-width: 55%; float: right">
+                </div>
+            </section>
+            <section>
+                <h3>CI/CD Travis</h3>
+                <div class="fragment">
+                    <p>Тестирование</p>
+                    <img src="static/img/Travis.png" alt="" style="max-width: 65%">
+                    <p style="text-align: right; font-size: 50%;">
+                        <a href="https://travis-ci.com/Toliak/particle-counter" target="_blank">
+                            Travis CI
+                        </a>
+                    </p>
+                </div>
+            </section>
+        </section>
+        <section>
+            <h2>Результаты</h2>
+            <p class="fragment">
+                Все результаты работы демонстрационных приложений сохраняются в директории artifacts
+            </p>
+        </section>
+        <section>
+            <section>
+                <h3>Пороговый алгоритм</h3>
+                <img src="static/img/ThresholdResult.png" alt="" style="max-width: 60%">
+            </section>
+            <section>
+                <h3>Алгоритм водоразделов</h3>
+                <img src="static/img/WatershedResult.png" alt="" style="max-width: 55%">
+            </section>
+            <section>
+                <h3>Спектральная кластеризация</h3>
+                <img src="static/img/ClusteringResult.png" alt="" style="max-width: 55%">
+            </section>
+        </section>
+        <section>
+            <section>
+                <h2>Сравнительный анализ</h2>
+                <table style="font-size: 70%" class="fragment">
+                    <thead>
+                    <tr>
+                        <th colspan="2">Средства\Материал</th>
+                        <th>B, Au</th>
+                        <th>Au</th>
+                        <th>Au, nano p-s</th>
+                        <th>Carbon</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr style="font-size: 85%">
+                        <td>Внеш.</td>
+                        <td>Ручной подсчет</td>
+                        <td>15000 &#177; 1000</td>
+                        <td>800 &#177; 100</td>
+                        <td>850 &#177; 10</td>
+                        <td>60 &#177; 10</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="5">Реализ.</td>
+                        <td>ISODATA</td>
+                        <td>8044</td>
+                        <td>870</td>
+                        <td>732</td>
+                        <td>69</td>
+                    </tr>
+                    <tr>
+                        <td>Mean</td>
+                        <td>7469</td>
+                        <td>859</td>
+                        <td>633</td>
+                        <td>1478</td>
+                    </tr>
+                    <tr>
+                        <td>Triangle</td>
+                        <td>16918</td>
+                        <td>806</td>
+                        <td>617</td>
+                        <td>217</td>
+                    </tr>
+                    <tr>
+                        <td>Otsu</td>
+                        <td>8044</td>
+                        <td>870</td>
+                        <td>732</td>
+                        <td>70</td>
+                    </tr>
+                    <tr>
+                        <td>Watershed</td>
+                        <td>8428</td>
+                        <td>891</td>
+                        <td>656</td>
+                        <td>57</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section>
+                <table style="font-size: 70%">
+                    <thead>
+                    <tr>
+                        <th>Средства\Материал</th>
+                        <th colspan="2">Серебряная пыль</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Ручной подсчет</td>
+                        <td>10</td>
+                        <td>137</td>
+                    </tr>
+                    <tr>
+                        <td>Spectral Clustering</td>
+                        <td>10</td>
+                        <td>104</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section>
+                <h3>Погрешность</h3>
+                <p style="font-size: 70%">Пороговые алгоритмы и алгоритм водоразделов</p>
+                <canvas data-chart="line">
+                    <!--
+    {
+      "data": {
+        "labels": [
+          "ISODATA",
+          " Mean",
+          " Triangle",
+          " Otsu",
+          " Watershed"
+        ],
+        "datasets": [
+          {
+            "data": [
+              23.2,
+              25.1,
+              6.4,
+              23.2,
+              21.9
+            ],
+            "label": "B, Au",
+            "backgroundColor": "rgba(20,220,220,0)",
+            "lineTension": 0
+          },
+          {
+            "data": [
+              4.4,
+              3.7,
+              0.4,
+              4.4,
+              5.7
+            ],
+            "label": "Au",
+            "backgroundColor": "rgba(20,220,220,0)",
+            "lineTension": 0
+          },
+          {
+            "data": [
+              7,
+              12.8,
+              13.7,
+              7,
+              11.4
+            ],
+            "label": "Au, nano",
+            "backgroundColor": "rgba(20,220,220,0)",
+            "lineTension": 0
+          },
+          {
+            "data": [
+              7.5,
+              30,
+              30,
+              8.3,
+              2.5
+            ],
+            "label": "Carbon",
+            "backgroundColor": "rgba(20,220,220,0)",
+            "lineTension": 0
+          }
+        ]
+      },
+      "options": {
+        "responsive": "true",
+        "scales": {
+          "yAxes": [
+            {
+              "type": "linear"
+            }
+          ]
+        }
+      }
+    }
+                    -->
+                </canvas>
+            </section>
+            <section>
+                <h3 style="font-size: 90%">Количество определенных частиц</h3>
+                <p style="font-size: 70%">Спектральная кластеризация</p>
+                <canvas data-chart="line">
+                    <!--
+    {
+      "data": {
+        "labels": [
+          "Серебряная пыль"
+        ],
+        "datasets": [
+          {
+            "data": [
+              10,
+              137
+            ],
+            "label": "Ручной подсчет",
+            "backgroundColor": "rgba(20,220,220,0)",
+            "lineTension": 0
+          },
+          {
+            "data": [
+              10,
+              104
+            ],
+            "label": "Spectral Clustering",
+            "backgroundColor": "rgba(20,220,220,0)",
+            "lineTension": 0
+          }
+        ]
+      },
+      "options": {
+        "responsive": "true",
+        "scales": {
+          "yAxes": [
+            {
+              "type": "linear"
+            }
+          ]
+        }
+      }
+    }
+                    -->
+                </canvas>
+            </section>
+        </section>
+        <section>
+            <h3>Спасибо за внимание</h3>
+            <div class="fragment">
+                <p>Ссылки:</p>
+                <div class="links">
+                    <p><a href="https://gitlab.toliak.ru/Toliak/particle-counter">Gitlab репозиторий</a></p>
+                    <p><a href="https://github.com/Toliak/particle-counter">Github репозиторий</a></p>
+                    <p><a href="https://toliak.ru/course-project/docs/latest">Документация</a></p>
+                    <p><a href="https://gitlab.toliak.ru/Toliak/particle-counter/pipelines">Gitlab pipelines</a></p>
+                    <p><a href="https://travis-ci.com/toliak/particle-counter">Travis CI</a></p>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script src="js/reveal.js"></script>
+
+<script>
+    // More info about config & dependencies:
+    // - https://github.com/hakimel/reveal.js#configuration
+    // - https://github.com/hakimel/reveal.js#dependencies
+    Reveal.initialize({
+        dependencies: [
+            {src: 'plugin/markdown/marked.js'},
+            {src: 'plugin/menu/menu.js'},
+            {src: 'plugin/markdown/markdown.js'},
+            {src: 'plugin/chart/Chart.js'},
+            {src: 'plugin/chart/csv2chart.js'},
+            {src: 'plugin/chalkboard/chalkboard.js'},
+            {src: 'plugin/notes/notes.js', async: true},
+            {src: 'plugin/highlight/highlight.js', async: true},
+            {src: 'plugin/math/math.js', async: true},
+        ],
+        chalkboard: {
+            src: null,
+            readOnly: undefined,
+            toggleChalkboardButton: {left: "70px", bottom: "28px", top: "auto", right: "auto"},
+            toggleNotesButton: {left: "110px", bottom: "30px", top: "auto", right: "auto"},
+            transition: 800,
+            theme: "chalkboard",
+            // configuration options for notes canvas and chalkboard
+            color: ['rgba(0,0,255,1)', 'rgba(255,255,255,0.5)'],
+            background: ['rgba(127,127,127,.1)', 'reveal.js-plugins/chalkboard/img/blackboard.png'],
+            pen: ['url(reveal.js-plugins/chalkboard/img/boardmarker.png), auto', 'url(reveal.js-plugins/chalkboard/img/chalk.png), auto'],
+        },
+        chart: {
+            defaults: {
+                global: {
+                    title: {fontColor: "#FFF"},
+                    legend: {
+                        position: "bottom",
+                        labels: {fontColor: "#FFF"},
+                    },
+                    tooltips: {
+                        labels: {fontColor: "#FFF"},
+                    },
+                },
+                scale: {
+                    scaleLabel: {fontColor: "#FFF"},
+                    gridLines: {color: "rgb(112,112,112)", zeroLineColor: "#FFF"},
+                    ticks: {fontColor: "#FFF"},
+                }
+            },
+            line: {
+                borderColor: ["rgba(20,220,220,.8)", "rgba(220,120,120,.8)", "rgba(20,120,220,.8)"],
+                "borderDash": [[5, 10], [0, 0]]
+            },
+
+
+        }
+    });
+</script>
+</body>
+</html>
